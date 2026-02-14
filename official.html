@@ -1,0 +1,2983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Pulse Professional · JICO Healthcare Management System</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Chart.js 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <style>
+        /* [Previous CSS styles remain exactly the same] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Professional Theme System */
+        :root {
+            --primary-900: #001b3a;
+            --primary-800: #002b5c;
+            --primary-700: #003c7a;
+            --primary-600: #004c97;
+            --primary-500: #1a5fa0;
+            --primary-400: #4a7fb0;
+            --primary-300: #7a9fc0;
+            
+            --accent-700: #1a4d2e;
+            --accent-600: #1f5e3a;
+            --accent-500: #2e8b57;
+            
+            --warning-700: #b34a00;
+            --danger-700: #c02f2f;
+            
+            --neutral-100: #f8fafc;
+            --neutral-200: #eef2f6;
+            --neutral-300: #e2e8f0;
+            --neutral-400: #cbd5e1;
+            --neutral-500: #94a3b8;
+            --neutral-600: #64748b;
+            --neutral-700: #475569;
+            --neutral-800: #334155;
+            --neutral-900: #1e293b;
+            
+            --bg-gradient: linear-gradient(155deg, #f0f5fa 0%, #e3ecf5 100%);
+            --card-bg: rgba(255,255,255,0.85);
+            --border-light: rgba(255,255,255,0.9);
+            --shadow-sm: 0 2px 4px rgba(0,20,40,0.02);
+            --shadow-md: 0 8px 22px -16px #102a4e;
+            --shadow-lg: 0 20px 40px -20px #102a4e;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 1rem;
+            color: var(--neutral-800);
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --bg-gradient: linear-gradient(155deg, #121b28 0%, #0a121f 100%);
+            --card-bg: rgba(30, 40, 55, 0.9);
+            --border-light: rgba(70, 90, 120, 0.3);
+            color: var(--neutral-200);
+        }
+
+        body.dark-theme .app-container {
+            background: var(--card-bg);
+            box-shadow: 0 30px 55px -25px #000, 0 0 0 1px rgba(100,150,200,0.1) inset;
+        }
+
+        .app-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-light) inset;
+            padding: 1.5rem;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-700);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-800);
+            line-height: 1.2;
+        }
+
+        .logo-text .badge {
+            background: var(--neutral-200);
+            padding: 0.2rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-600);
+        }
+
+        body.dark-theme .logo-text h1 {
+            color: var(--neutral-100);
+        }
+
+        body.dark-theme .logo-text .badge {
+            background: var(--neutral-800);
+            color: var(--neutral-300);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--neutral-200);
+            border: none;
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neutral-700);
+            font-weight: 500;
+        }
+
+        body.dark-theme .theme-toggle {
+            background: var(--neutral-800);
+            color: var(--neutral-200);
+        }
+
+        .system-status {
+            background: var(--accent-600);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--neutral-300);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            background: transparent;
+            color: var(--neutral-600);
+            font-weight: 600;
+            border-radius: 60px 60px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-tab i {
+            margin-right: 8px;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-600);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--primary-700);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+
+        body.dark-theme .nav-tab {
+            color: var(--neutral-400);
+        }
+
+        body.dark-theme .nav-tab.active {
+            background: var(--neutral-800);
+            color: var(--neutral-100);
+        }
+
+        .nav-tab.active i {
+            color: var(--primary-500);
+        }
+
+        /* Tab Panes */
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .stat-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-100);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-600);
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--neutral-900);
+        }
+
+        .stat-info p {
+            color: var(--neutral-600);
+            font-size: 0.9rem;
+        }
+
+        body.dark-theme .stat-info h3 {
+            color: var(--neutral-100);
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Registration Panel */
+        .panel {
+            background: white;
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        body.dark-theme .panel {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            color: var(--neutral-800);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .site-footer {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #eaeaea;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.footer-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.footer-title span {
+  color: #4fd1c5;
+}
+
+.footer-credits {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.footer-credits span {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .footer-title {
+    font-size: 1rem;
+  }
+
+  .footer-credits {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+        .panel-title i {
+            color: var(--primary-600);
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--neutral-600);
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid var(--neutral-200);
+            border-radius: 60px;
+            font-size: 0.9rem;
+            background: var(--neutral-100);
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(0, 76, 151, 0.1);
+        }
+
+        textarea.form-control {
+            border-radius: 1.2rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        body.dark-theme .form-control {
+            background: var(--neutral-900);
+            border-color: var(--neutral-700);
+            color: var(--neutral-200);
+        }
+
+        /* Student Lookup */
+        .student-lookup {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .student-lookup input {
+            flex: 1;
+        }
+
+        .btn-lookup {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Drug Entry */
+        .drug-entry {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: var(--neutral-100);
+            padding: 0.8rem;
+            border-radius: 60px;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        body.dark-theme .drug-entry {
+            background: var(--neutral-900);
+        }
+
+        .drug-name {
+            flex: 2;
+            min-width: 120px;
+        }
+
+        .drug-dosage {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .drug-duration {
+            width: 70px;
+        }
+
+        .drug-times {
+            width: 60px;
+        }
+
+        .btn-remove-drug {
+            background: none;
+            border: none;
+            color: var(--danger-700);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .btn-add-drug {
+            background: var(--neutral-200);
+            border: 1px dashed var(--primary-400);
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            color: var(--primary-600);
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--primary-600);
+        }
+
+        /* Referral Section */
+        .referral-section {
+            background: var(--neutral-100);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        body.dark-theme .referral-section {
+            background: var(--neutral-900);
+        }
+
+        .referral-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .referral-details {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .referral-details.active {
+            display: block;
+        }
+
+        /* Patient List */
+        .patient-list-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .patient-item {
+            background: var(--neutral-100);
+            border-radius: 1.5rem;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--neutral-200);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-theme .patient-item {
+            background: var(--neutral-900);
+            border-color: var(--neutral-700);
+        }
+
+        .patient-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-400);
+        }
+
+        .patient-item.selected {
+            background: white;
+            border-left: 4px solid var(--primary-600);
+        }
+
+        body.dark-theme .patient-item.selected {
+            background: var(--neutral-800);
+        }
+
+        .patient-status {
+            padding: 0.3rem 1rem;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(255, 193, 7, 0.2);
+            color: #b38f00;
+        }
+
+        .status-completed {
+            background: rgba(46, 139, 87, 0.2);
+            color: var(--accent-600);
+        }
+
+        /* Dose Tracking */
+        .dose-tracking {
+            margin-top: 1rem;
+        }
+
+        .dose-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: var(--neutral-100);
+            border-radius: 60px;
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-theme .dose-row {
+            background: var(--neutral-900);
+        }
+
+        .dose-icons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dose-icons i {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dose-icons i.fa-check-circle {
+            color: var(--accent-500);
+        }
+
+        .dose-icons i.fa-times-circle {
+            color: var(--danger-700);
+        }
+
+        .dose-icons i.fa-circle {
+            color: var(--neutral-400);
+        }
+
+        .dose-icons i:hover {
+            transform: scale(1.1);
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 1px solid var(--neutral-200);
+            height: 300px;
+        }
+
+        body.dark-theme .chart-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .chart-card h4 {
+            margin-bottom: 1rem;
+            color: var(--neutral-700);
+            font-size: 1rem;
+        }
+
+        /* Inventory Grid */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .inventory-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .inventory-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .stock-level {
+            width: 100px;
+            height: 6px;
+            background: var(--neutral-300);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stock-fill {
+            height: 100%;
+            background: var(--accent-500);
+            border-radius: 3px;
+        }
+
+        .stock-fill.low {
+            background: var(--warning-700);
+        }
+
+        .stock-fill.critical {
+            background: var(--danger-700);
+        }
+
+        /* Database Visualizer */
+        .database-viewer {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .database-viewer {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        body.dark-theme th {
+            background: var(--neutral-900);
+            color: var(--neutral-300);
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        /* Footer Stats */
+        .footer-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: 60px;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .footer-stats {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--neutral-700);
+        }
+
+        .footer-stat i {
+            color: var(--primary-500);
+        }
+
+        .footer-stat strong {
+            color: var(--neutral-900);
+            margin-left: 5px;
+        }
+
+        body.dark-theme .footer-stat strong {
+            color: var(--neutral-100);
+        }
+
+        /* Dialogs */
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+
+        body.dark-theme .dialog {
+            background: var(--neutral-800);
+        }
+
+        .dialog h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-700);
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .dialog-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .dialog-btn.cancel {
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+        }
+
+        .dialog-btn.save {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-excel {
+            background: var(--accent-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-email {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heart-pulse"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Pulse Professional</h1>
+                    <span class="badge">JICO Healthcare Management System v2.0</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-sun"></i>
+                    <span>Theme</span>
+                </button>
+                <div class="system-status">
+                    <i class="fas fa-database"></i> Live Database
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="dashboard">
+                <i class="fas fa-clinic-medical"></i> Dashboard
+            </button>
+            <button class="nav-tab" data-tab="patients">
+                <i class="fas fa-users"></i> Patients
+            </button>
+            <button class="nav-tab" data-tab="database">
+                <i class="fas fa-database"></i> Database
+            </button>
+            <button class="nav-tab" data-tab="statistics">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="nav-tab" data-tab="inventory">
+                <i class="fas fa-pills"></i> Pharmacy
+            </button>
+            <button class="nav-tab" data-tab="reports">
+                <i class="fas fa-file-alt"></i> Reports
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-pane active">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e6f0ff;">
+                        <i class="fas fa-users" style="color: #004c97;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPatients">0</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e6ffe6;">
+                        <i class="fas fa-heart-circle-check" style="color: #1f5e3a;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activePatients">0</h3>
+                        <p>Active Cases</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3e6;">
+                        <i class="fas fa-clock" style="color: #b34a00;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="todayVisits">0</h3>
+                        <p>Today's Visits</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f0e6ff;">
+                        <i class="fas fa-pills" style="color: #6a4e9a;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="lowStock">0</h3>
+                        <p>Low Stock Items</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div class="dashboard-layout">
+                <!-- Registration Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-user-plus"></i>
+                        <span>New Patient Registration</span>
+                    </div>
+
+                    <!-- Student Lookup -->
+                    <div class="student-lookup">
+                        <input type="text" class="form-control" id="studentSearch" placeholder="Search student database..." list="studentList">
+                        <datalist id="studentList"></datalist>
+                        <button class="btn-lookup" id="lookupStudentBtn"><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" class="form-control" id="patientName" placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Class</label>
+                            <select class="form-control" id="patientClass">
+                                <option value="S.1">S.1</option>
+                                <option value="S.2">S.2</option>
+                                <option value="S.3">S.3</option>
+                                <option value="S.4">S.4</option>
+                                <option value="S.5">S.5</option>
+                                <option value="S.6">S.6</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Stream</label>
+                            <select class="form-control" id="patientStream">
+                                <option value="East">East</option>
+                                <option value="West">West</option>
+                                <option value="North">North</option>
+                                <option value="South">South</option>
+                                <option value="Science">Science</option>
+                                <option value="Arts">Arts</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" class="form-control" id="patientAge" min="1" max="100">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select class="form-control" id="patientGender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact</label>
+                            <input type="text" class="form-control" id="patientContact" placeholder="Phone/Email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Symptoms / Diagnosis</label>
+                        <input type="text" class="form-control" id="patientSymptoms" placeholder="e.g., Fever, headache">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Notes</label>
+                        <textarea class="form-control" id="patientNotes" rows="2" placeholder="Any additional information..."></textarea>
+                    </div>
+
+                    <!-- Medications -->
+                    <div class="form-group">
+                        <label>Prescribed Medications</label>
+                        <div id="medicationsList"></div>
+                        <button class="btn-add-drug" id="addMedicationBtn">
+                            <i class="fas fa-plus"></i> Add Medication
+                        </button>
+                    </div>
+
+                    <!-- Referral -->
+                    <div class="referral-section">
+                        <label class="referral-toggle">
+                            <input type="checkbox" id="hasReferral">
+                            <span><i class="fas fa-share"></i> Add Referral</span>
+                        </label>
+                        <div class="referral-details" id="referralDetails">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Referred To</label>
+                                    <input type="text" class="form-control" id="referralTo" placeholder="Hospital/Clinic">
+                                </div>
+                                <div class="form-group">
+                                    <label>Time</label>
+                                    <input type="time" class="form-control" id="referralTime">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Reason</label>
+                                <input type="text" class="form-control" id="referralReason" placeholder="Reason for referral">
+                            </div>
+                            <div class="form-group">
+                                <label>Follow-up Date</label>
+                                <input type="date" class="form-control" id="followupDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="registerPatientBtn">
+                        <i class="fas fa-save"></i> Register Patient
+                    </button>
+                </div>
+
+                <!-- Patient List Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-list"></i>
+                        <span>Active Patients</span>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="patientSearch" placeholder="Search patients...">
+                    </div>
+
+                    <div class="patient-list-container" id="patientList">
+                        <!-- Patient items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Detail Panel -->
+            <div class="panel" style="margin-top: 1.5rem;" id="patientDetailPanel">
+                <div class="panel-title">
+                    <i class="fas fa-user"></i>
+                    <span id="detailPatientName">Select a patient to view details</span>
+                    <button class="btn-excel" id="markCompletedBtn" style="display: none; margin-left: auto;">
+                        <i class="fas fa-check"></i> Mark Completed
+                    </button>
+                </div>
+                <div id="emptyDetailMessage" style="text-align: center; padding: 2rem; color: var(--neutral-500);">
+                    <i class="fas fa-arrow-left" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Select a patient from the list to view their details and track doses</p>
+                </div>
+                <div id="patientDetailContent" style="display: none;">
+                    <div class="form-grid" style="margin-bottom: 1rem;">
+                        <div>
+                            <p><strong>Patient ID:</strong> <span id="detailPatientId"></span></p>
+                            <p><strong>Class/Stream:</strong> <span id="detailClass"></span></p>
+                            <p><strong>Age/Gender:</strong> <span id="detailAgeGender"></span></p>
+                        </div>
+                        <div>
+                            <p><strong>Contact:</strong> <span id="detailContact"></span></p>
+                            <p><strong>Symptoms:</strong> <span id="detailSymptoms"></span></p>
+                            <p><strong>Registered:</strong> <span id="detailDate"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="panel" style="background: var(--neutral-100);">
+                        <h5><i class="fas fa-prescription"></i> Medications</h5>
+                        <div id="detailMedications"></div>
+                    </div>
+
+                    <div id="detailReferral" style="display: none; margin: 1rem 0; padding: 1rem; background: #fff3cd; border-radius: 1rem;">
+                        <i class="fas fa-share"></i> <span id="referralText"></span>
+                    </div>
+
+                    <div class="dose-tracking">
+                        <h5><i class="fas fa-clock"></i> Today's Dose Tracking</h5>
+                        <div id="doseTracking"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Tab -->
+        <div id="patients-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-users"></i>
+                    <span>Complete Patient Registry</span>
+                </div>
+                
+                <div class="action-bar">
+                    <button class="btn-excel" id="exportPatientsBtn">
+                        <i class="fas fa-file-excel"></i> Export Patient List
+                    </button>
+                    <button class="btn-email" id="importStudentsBtn">
+                        <i class="fas fa-upload"></i> Import Student Database
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Symptoms</th>
+                                <th>Status</th>
+                                <th>Visit Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Tab -->
+        <div id="database-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-database"></i>
+                    <span>Visual Database Explorer</span>
+                </div>
+
+                <!-- Database Stats -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbTotalRecords">0</h3>
+                            <p>Total Records</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbStorageSize">0 KB</h3>
+                            <p>Storage Used</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbLastBackup">Never</h3>
+                            <p>Last Backup</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Browser -->
+                <div style="margin-bottom: 1rem;">
+                    <select class="form-control" id="dbTableView" style="width: 200px;">
+                        <option value="patients">Patients</option>
+                        <option value="medications">Medications</option>
+                        <option value="referrals">Referrals</option>
+                        <option value="inventory">Inventory</option>
+                        <option value="dispensing">Dispensing Log</option>
+                    </select>
+                </div>
+
+                <div class="table-container" id="databaseTableContainer">
+                    <!-- Table will be inserted here -->
+                </div>
+
+                <div class="action-bar" style="margin-top: 2rem;">
+                    <button class="btn-excel" id="backupDatabaseBtn">
+                        <i class="fas fa-download"></i> Backup Database
+                    </button>
+                    <button class="btn-email" id="restoreDatabaseBtn">
+                        <i class="fas fa-upload"></i> Restore Database
+                    </button>
+                    <button class="btn-primary" id="optimizeDatabaseBtn">
+                        <i class="fas fa-broom"></i> Optimize
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Healthcare Analytics</span>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4>Common Conditions</h4>
+                        <canvas id="conditionsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Patient Status</h4>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Monthly Trends</h4>
+                        <canvas id="monthlyTrendsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Class Distribution</h4>
+                        <canvas id="classDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Analytics Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="avgRecoveryTime">0</h3>
+                            <p>Avg Recovery (days)</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="peakHour">00:00</h3>
+                            <p>Peak Visit Time</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="commonCondition">-</h3>
+                            <p>Most Common</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="referralRate">0%</h3>
+                            <p>Referral Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-pills"></i>
+                    <span>Pharmacy Inventory Management</span>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn-primary" id="addStockBtn">
+                        <i class="fas fa-plus"></i> Add Stock
+                    </button>
+                    <button class="btn-excel" id="exportInventoryBtn">
+                        <i class="fas fa-file-excel"></i> Export Inventory
+                    </button>
+                </div>
+
+                <!-- Inventory Grid -->
+                <div class="inventory-grid" id="inventoryGrid">
+                    <!-- Inventory items will be inserted here -->
+                </div>
+
+                <!-- Dispensing Log -->
+                <div class="panel" style="margin-top: 2rem;">
+                    <h5><i class="fas fa-history"></i> Recent Dispensing Log</h5>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Medication</th>
+                                    <th>Quantity</th>
+                                    <th>Patient</th>
+                                    <th>Nurse</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dispensingLogBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports & Exports</span>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn-excel" id="generateFullReport">
+                        <i class="fas fa-file-excel"></i> Complete Report
+                    </button>
+                    <button class="btn-email" id="emailReportBtn">
+                        <i class="fas fa-envelope"></i> Email Report
+                    </button>
+                    <button class="btn-primary" id="generateMonthlyReport">
+                        <i class="fas fa-calendar"></i> Monthly Summary
+                    </button>
+                </div>
+
+                <!-- Report Preview -->
+                <div class="stats-grid" style="margin: 2rem 0;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportTotalPatients">0</h3>
+                            <p>Total Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportThisMonth">0</h3>
+                            <p>This Month</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportRecovered">0</h3>
+                            <p>Recovered</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportActive">0</h3>
+                            <p>Active</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4>Monthly Comparison</h4>
+                        <canvas id="monthlyComparisonChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Recovery Rate</h4>
+                        <canvas id="recoveryRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="footer-stats">
+            <div class="footer-stat">
+                <i class="fas fa-database"></i>
+                <span>Records: <strong id="footerRecords">0</strong></span>
+            </div>
+            <div class="footer-stat">
+                <i class="fas fa-check-circle" style="color: #2e8b57;"></i>
+                <span>Today's Doses: <strong id="footerDoses">0</strong></span>
+            </div>
+            <div class="footer-stat">
+                <i class="fas fa-exclamation-triangle" style="color: #b34a00;"></i>
+                <span>Missed: <strong id="footerMissed">0</strong></span>
+            </div>
+            <div class="footer-stat">
+                <i class="fas fa-clock"></i>
+                <span>Last Updated: <strong id="footerTime">Just now</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Dialog -->
+    <div class="dialog-overlay" id="stockDialog">
+        <div class="dialog">
+            <h3><i class="fas fa-pills"></i> Add/Update Stock</h3>
+            <input type="text" class="form-control" id="stockName" placeholder="Medication name">
+            <input type="number" class="form-control" id="stockQuantity" placeholder="Quantity" min="0">
+            <input type="number" class="form-control" id="stockReorder" placeholder="Reorder level" min="0">
+            <input type="number" class="form-control" id="stockPrice" placeholder="Unit price ($)" step="0.01" min="0">
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel" id="cancelStockBtn">Cancel</button>
+                <button class="dialog-btn save" id="saveStockBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Dialog -->
+    <div class="dialog-overlay" id="importDialog">
+        <div class="dialog">
+            <h3><i class="fas fa-upload"></i> Import Student Database</h3>
+            <p style="margin-bottom: 1rem;">Upload CSV or Excel file with columns: Name, Class, Stream, Age, Gender, Contact</p>
+            <input type="file" class="form-control" id="importFile" accept=".csv,.xlsx,.xls">
+            <div id="importProgress" style="display: none; margin: 1rem 0;">
+                <div style="background: var(--neutral-200); border-radius: 60px; height: 10px; overflow: hidden;">
+                    <div id="importProgressBar" style="width: 0%; height: 100%; background: var(--primary-600); transition: width 0.3s;"></div>
+                </div>
+                <p id="importStatus" style="margin-top: 0.5rem; font-size: 0.9rem;"></p>
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel" id="cancelImportBtn">Cancel</button>
+                <button class="dialog-btn save" id="confirmImportBtn">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Professional Healthcare Management System
+        class HealthcareSystem {
+            constructor() {
+                this.db = null;
+                this.patients = [];
+                this.studentDatabase = [];
+                this.inventory = [];
+                this.dispensingLog = [];
+                this.medications = [];
+                this.referrals = [];
+                
+                this.DB_NAME = 'PulseHealthcareDB';
+                this.DB_VERSION = 2; // Incremented version for schema update
+                
+                this.init();
+            }
+
+            async init() {
+                await this.initDatabase();
+                this.loadSampleData();
+                this.setupEventListeners();
+                this.refreshUI();
+                this.updateAllCharts();
+                this.updateInventoryDisplay();
+                this.updateDatabaseView();
+            }
+
+            async initDatabase() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                    
+                    request.onerror = () => {
+                        console.error('IndexedDB error:', request.error);
+                        reject(request.error);
+                    };
+                    
+                    request.onsuccess = (e) => {
+                        this.db = e.target.result;
+                        this.loadFromDB();
+                        resolve();
+                    };
+                    
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        
+                        if (!db.objectStoreNames.contains('patients')) {
+                            const patientStore = db.createObjectStore('patients', { keyPath: 'id' });
+                            patientStore.createIndex('status', 'status', { unique: false });
+                            patientStore.createIndex('registrationDate', 'registrationDate', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('studentDatabase')) {
+                            const studentStore = db.createObjectStore('studentDatabase', { keyPath: 'id', autoIncrement: true });
+                            studentStore.createIndex('name', 'name', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('inventory')) {
+                            const inventoryStore = db.createObjectStore('inventory', { keyPath: 'id', autoIncrement: true });
+                            inventoryStore.createIndex('name', 'name', { unique: false });
+                            inventoryStore.createIndex('quantity', 'quantity', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('dispensing')) {
+                            const dispStore = db.createObjectStore('dispensing', { keyPath: 'id', autoIncrement: true });
+                            dispStore.createIndex('date', 'date', { unique: false });
+                            dispStore.createIndex('patient', 'patient', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('medications')) {
+                            db.createObjectStore('medications', { keyPath: 'id', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('referrals')) {
+                            db.createObjectStore('referrals', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                });
+            }
+
+            loadFromDB() {
+                try {
+                    // Load patients
+                    const tx = this.db.transaction('patients', 'readonly');
+                    const store = tx.objectStore('patients');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        this.patients = req.result || [];
+                        this.refreshUI();
+                    };
+                    req.onerror = () => console.error('Error loading patients:', req.error);
+
+                    // Load inventory
+                    const invTx = this.db.transaction('inventory', 'readonly');
+                    const invStore = invTx.objectStore('inventory');
+                    const invReq = invStore.getAll();
+                    invReq.onsuccess = () => {
+                        this.inventory = invReq.result || [];
+                        this.updateInventoryDisplay();
+                    };
+                    invReq.onerror = () => console.error('Error loading inventory:', invReq.error);
+
+                    // Load dispensing log
+                    const dispTx = this.db.transaction('dispensing', 'readonly');
+                    const dispStore = dispTx.objectStore('dispensing');
+                    const dispReq = dispStore.getAll();
+                    dispReq.onsuccess = () => {
+                        this.dispensingLog = dispReq.result || [];
+                    };
+                    dispReq.onerror = () => console.error('Error loading dispensing log:', dispReq.error);
+                } catch (error) {
+                    console.error('Error loading from DB:', error);
+                }
+            }
+
+            loadSampleData() {
+                // Only add sample data if database is empty
+                if (this.patients.length === 0) {
+                    // Add default inventory if empty
+                    if (this.inventory.length === 0) {
+                        this.inventory = [
+                            { id: 1, name: 'Paracetamol', quantity: 500, reorderLevel: 100, price: 0.05, unit: 'tablets' },
+                            { id: 2, name: 'Amoxicillin', quantity: 300, reorderLevel: 50, price: 0.15, unit: 'capsules' },
+                            { id: 3, name: 'Ibuprofen', quantity: 400, reorderLevel: 80, price: 0.08, unit: 'tablets' },
+                            { id: 4, name: 'Artemether', quantity: 100, reorderLevel: 30, price: 2.50, unit: 'doses' },
+                            { id: 5, name: 'Cough Syrup', quantity: 50, reorderLevel: 20, price: 3.00, unit: 'bottles' }
+                        ];
+                        this.saveInventory();
+                    }
+                }
+            }
+
+            savePatients() {
+                try {
+                    const tx = this.db.transaction('patients', 'readwrite');
+                    const store = tx.objectStore('patients');
+                    store.clear();
+                    this.patients.forEach(p => store.put(p));
+                } catch (error) {
+                    console.error('Error saving patients:', error);
+                }
+            }
+
+            saveInventory() {
+                try {
+                    const tx = this.db.transaction('inventory', 'readwrite');
+                    const store = tx.objectStore('inventory');
+                    store.clear();
+                    this.inventory.forEach(i => store.put(i));
+                } catch (error) {
+                    console.error('Error saving inventory:', error);
+                }
+            }
+
+            saveDispensing() {
+                try {
+                    const tx = this.db.transaction('dispensing', 'readwrite');
+                    const store = tx.objectStore('dispensing');
+                    store.clear();
+                    this.dispensingLog.forEach(d => store.put(d));
+                } catch (error) {
+                    console.error('Error saving dispensing log:', error);
+                }
+            }
+
+            saveStudentDatabase() {
+                try {
+                    const tx = this.db.transaction('studentDatabase', 'readwrite');
+                    const store = tx.objectStore('studentDatabase');
+                    store.clear();
+                    this.studentDatabase.forEach(s => store.put(s));
+                } catch (error) {
+                    console.error('Error saving student database:', error);
+                }
+            }
+
+            getNextPatientId() {
+                let max = 0;
+                this.patients.forEach(p => {
+                    let num = parseInt(p.id?.replace('P', '')) || 0;
+                    if (num > max) max = num;
+                });
+                return 'P' + String(max + 1).padStart(4, '0');
+            }
+
+            registerPatient(data) {
+                const patient = {
+                    id: this.getNextPatientId(),
+                    ...data,
+                    registrationDate: new Date().toISOString(),
+                    status: 'active',
+                    visits: 1,
+                    adherence: {}
+                };
+
+                this.patients.push(patient);
+                this.savePatients();
+                
+                // Add to dispensing log if medications prescribed
+                if (patient.medications && patient.medications.length > 0) {
+                    patient.medications.forEach(med => {
+                        this.dispensingLog.push({
+                            id: Date.now() + Math.random(),
+                            date: new Date().toISOString().slice(0, 10),
+                            medication: med.name,
+                            quantity: 1,
+                            patient: patient.id,
+                            nurse: 'System',
+                            type: 'prescription'
+                        });
+                    });
+                    this.saveDispensing();
+                }
+
+                return patient;
+            }
+
+            updateDose(patientId, medication, slot, value) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (!patient) return;
+
+                const today = new Date().toISOString().slice(0, 10);
+                if (!patient.adherence) patient.adherence = {};
+                if (!patient.adherence[today]) patient.adherence[today] = {};
+                if (!patient.adherence[today][medication]) {
+                    patient.adherence[today][medication] = { morning: null, afternoon: null, evening: null };
+                }
+
+                patient.adherence[today][medication][slot] = value;
+
+                // Update inventory if dose taken
+                if (value === true) {
+                    const inventoryItem = this.inventory.find(i => 
+                        i.name?.toLowerCase() === medication.toLowerCase()
+                    );
+                    if (inventoryItem) {
+                        inventoryItem.quantity = Math.max(0, inventoryItem.quantity - 1);
+                        
+                        this.dispensingLog.push({
+                            id: Date.now(),
+                            date: today,
+                            medication: medication,
+                            quantity: 1,
+                            patient: patientId,
+                            nurse: 'System',
+                            dose: slot
+                        });
+                        
+                        this.saveInventory();
+                        this.saveDispensing();
+                    }
+                }
+
+                this.savePatients();
+                this.refreshUI();
+            }
+
+            markPatientCompleted(patientId) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (patient) {
+                    patient.status = 'completed';
+                    if (patient.medications) {
+                        patient.medications.forEach(m => m.status = 'completed');
+                    }
+                    this.savePatients();
+                    this.refreshUI();
+                }
+            }
+
+            refreshUI() {
+                // Update stats
+                document.getElementById('totalPatients').textContent = this.patients.length;
+                document.getElementById('activePatients').textContent = this.patients.filter(p => p.status === 'active').length;
+                
+                const today = new Date().toISOString().slice(0, 10);
+                document.getElementById('todayVisits').textContent = this.patients.filter(p => 
+                    p.registrationDate?.startsWith(today)
+                ).length;
+                
+                document.getElementById('lowStock').textContent = this.inventory.filter(i => 
+                    i.quantity <= i.reorderLevel
+                ).length;
+
+                // Update patient list
+                this.renderPatientList();
+                
+                // Update patients table
+                this.renderPatientsTable();
+                
+                // Update footer stats
+                document.getElementById('footerRecords').textContent = this.patients.length;
+                
+                let totalDoses = 0;
+                let takenDoses = 0;
+                this.patients.forEach(p => {
+                    if (p.adherence && p.adherence[today]) {
+                        Object.values(p.adherence[today]).forEach(doses => {
+                            Object.values(doses).forEach(v => {
+                                if (v !== undefined && v !== null) {
+                                    totalDoses++;
+                                    if (v === true) takenDoses++;
+                                }
+                            });
+                        });
+                    }
+                });
+                
+                document.getElementById('footerDoses').textContent = totalDoses > 0 ? `${takenDoses}/${totalDoses}` : '0/0';
+                
+                let missedDoses = 0;
+                this.patients.forEach(p => {
+                    if (p.adherence && p.adherence[today]) {
+                        Object.values(p.adherence[today]).forEach(doses => {
+                            if (doses.morning === false) missedDoses++;
+                            if (doses.afternoon === false) missedDoses++;
+                            if (doses.evening === false) missedDoses++;
+                        });
+                    }
+                });
+                document.getElementById('footerMissed').textContent = missedDoses;
+                
+                document.getElementById('footerTime').textContent = new Date().toLocaleTimeString();
+                
+                // Update report stats
+                document.getElementById('reportTotalPatients').textContent = this.patients.length;
+                const thisMonth = new Date().toISOString().slice(0, 7);
+                document.getElementById('reportThisMonth').textContent = this.patients.filter(p => 
+                    p.registrationDate?.startsWith(thisMonth)
+                ).length;
+                document.getElementById('reportRecovered').textContent = this.patients.filter(p => 
+                    p.status === 'completed'
+                ).length;
+                document.getElementById('reportActive').textContent = this.patients.filter(p => 
+                    p.status === 'active'
+                ).length;
+
+                // Update database stats
+                document.getElementById('dbTotalRecords').textContent = this.patients.length + this.inventory.length + this.dispensingLog.length;
+                
+                // Calculate storage size (estimate)
+                const jsonString = JSON.stringify({
+                    patients: this.patients,
+                    inventory: this.inventory,
+                    dispensing: this.dispensingLog,
+                    studentDatabase: this.studentDatabase
+                });
+                const size = new Blob([jsonString]).size;
+                document.getElementById('dbStorageSize').textContent = (size / 1024).toFixed(2) + ' KB';
+            }
+
+            renderPatientList() {
+                const container = document.getElementById('patientList');
+                const searchTerm = document.getElementById('patientSearch')?.value.toLowerCase() || '';
+                
+                let filteredPatients = this.patients;
+                if (searchTerm) {
+                    filteredPatients = this.patients.filter(p => 
+                        p.name?.toLowerCase().includes(searchTerm) ||
+                        p.id?.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                container.innerHTML = filteredPatients.map(p => `
+                    <div class="patient-item" data-id="${p.id}">
+                        <div>
+                            <strong>${p.name || 'Unnamed'}</strong>
+                            <br>
+                            <small>${p.id} · ${p.class || 'N/A'} ${p.stream || ''}</small>
+                        </div>
+                        <span class="patient-status status-${p.status}">
+                            ${p.status === 'active' ? '🟢 Active' : '✅ Completed'}
+                        </span>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                document.querySelectorAll('.patient-item').forEach(item => {
+                    item.addEventListener('click', () => this.showPatientDetail(item.dataset.id));
+                });
+            }
+
+            renderPatientsTable() {
+                const tbody = document.getElementById('patientsTableBody');
+                tbody.innerHTML = this.patients.map(p => `
+                    <tr>
+                        <td>${p.id || 'N/A'}</td>
+                        <td>${p.name || 'N/A'}</td>
+                        <td>${p.class || 'N/A'} ${p.stream || ''}</td>
+                        <td>${p.age || 'N/A'}</td>
+                        <td>${p.gender || 'N/A'}</td>
+                        <td>${p.symptoms || 'N/A'}</td>
+                        <td>
+                            <span class="patient-status status-${p.status || 'active'}">
+                                ${p.status === 'active' ? 'Active' : 'Completed'}
+                            </span>
+                        </td>
+                        <td>${p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <button class="btn-lookup" onclick="system.showPatientDetail('${p.id}')" style="padding: 0.3rem 1rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            showPatientDetail(patientId) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (!patient) return;
+
+                document.getElementById('emptyDetailMessage').style.display = 'none';
+                document.getElementById('patientDetailContent').style.display = 'block';
+                document.getElementById('detailPatientName').textContent = patient.name || 'Unknown';
+                document.getElementById('detailPatientId').textContent = patient.id || 'N/A';
+                document.getElementById('detailClass').textContent = `${patient.class || 'N/A'} · ${patient.stream || 'N/A'}`;
+                document.getElementById('detailAgeGender').textContent = `${patient.age || 'N/A'} years · ${patient.gender || 'N/A'}`;
+                document.getElementById('detailContact').textContent = patient.contact || 'Not provided';
+                document.getElementById('detailSymptoms').textContent = patient.symptoms || 'None';
+                document.getElementById('detailDate').textContent = patient.registrationDate ? 
+                    new Date(patient.registrationDate).toLocaleDateString() : 'N/A';
+
+                // Render medications
+                const medsDiv = document.getElementById('detailMedications');
+                if (patient.medications && patient.medications.length > 0) {
+                    medsDiv.innerHTML = patient.medications.map(m => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: white; border-radius: 30px; margin-bottom: 0.3rem;">
+                            <span><strong>${m.name || 'Unknown'}</strong> ${m.dosage || ''}</span>
+                            <span>${m.timesPerDay || 0}x/day for ${m.duration || 0} days</span>
+                            <span style="color: ${m.status === 'active' ? '#b34a00' : '#2e8b57'}">
+                                ${m.status === 'active' ? '🟡 Ongoing' : '✅ Completed'}
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    medsDiv.innerHTML = '<p>No medications prescribed</p>';
+                }
+
+                // Show referral if exists
+                if (patient.referral) {
+                    document.getElementById('detailReferral').style.display = 'block';
+                    document.getElementById('referralText').textContent = 
+                        `Referred to ${patient.referral.to || 'Unknown'} at ${patient.referral.time || 'N/A'} - ${patient.referral.reason || ''}`;
+                } else {
+                    document.getElementById('detailReferral').style.display = 'none';
+                }
+
+                // Show/hide mark completed button
+                const markBtn = document.getElementById('markCompletedBtn');
+                if (patient.status === 'active') {
+                    markBtn.style.display = 'block';
+                    markBtn.onclick = () => this.markPatientCompleted(patient.id);
+                } else {
+                    markBtn.style.display = 'none';
+                }
+
+                // Render dose tracking
+                this.renderDoseTracking(patient);
+            }
+
+            renderDoseTracking(patient) {
+                const container = document.getElementById('doseTracking');
+                const today = new Date().toISOString().slice(0, 10);
+
+                if (!patient.medications || patient.medications.length === 0) {
+                    container.innerHTML = '<p>No medications to track</p>';
+                    return;
+                }
+
+                const activeMeds = patient.medications.filter(m => m.status === 'active');
+                if (activeMeds.length === 0) {
+                    container.innerHTML = '<p>All medications completed</p>';
+                    return;
+                }
+
+                container.innerHTML = activeMeds.map(med => {
+                    const times = med.timesPerDay || 2;
+                    const slots = ['morning', 'afternoon', 'evening'].slice(0, times);
+                    const adherence = patient.adherence?.[today]?.[med.name] || {};
+
+                    return `
+                        <div class="dose-row">
+                            <span style="width: 120px;"><strong>${med.name}</strong></span>
+                            <div class="dose-icons">
+                                ${slots.map(slot => {
+                                    const status = adherence[slot];
+                                    const iconClass = status === true ? 'fa-check-circle' : 
+                                                     status === false ? 'fa-times-circle' : 'fa-circle';
+                                    return `<i class="fas ${iconClass}" data-med="${med.name}" data-slot="${slot}"></i>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Add click handlers
+                container.querySelectorAll('.dose-icons i').forEach(icon => {
+                    icon.addEventListener('click', (e) => {
+                        const med = e.target.dataset.med;
+                        const slot = e.target.dataset.slot;
+                        const current = patient.adherence?.[today]?.[med]?.[slot];
+                        const newVal = current === true ? false : (current === false ? null : true);
+                        this.updateDose(patient.id, med, slot, newVal);
+                        this.showPatientDetail(patient.id);
+                    });
+                });
+            }
+
+            updateAllCharts() {
+                this.updateConditionsChart();
+                this.updateStatusChart();
+                this.updateMonthlyTrends();
+                this.updateClassDistribution();
+                this.updateMonthlyComparison();
+                this.updateRecoveryRate();
+            }
+
+            updateConditionsChart() {
+                const conditions = {};
+                this.patients.forEach(p => {
+                    if (p.symptoms) {
+                        const mainSym = p.symptoms.split(',')[0].trim();
+                        conditions[mainSym] = (conditions[mainSym] || 0) + 1;
+                    }
+                });
+
+                const ctx = document.getElementById('conditionsChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.conditionsChart) window.conditionsChart.destroy();
+                window.conditionsChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(conditions).length ? Object.keys(conditions) : ['No Data'],
+                        datasets: [{
+                            data: Object.keys(conditions).length ? Object.values(conditions) : [1],
+                            backgroundColor: ['#004c97', '#1f5e3a', '#b34a00', '#6a4e9a', '#c02f2f', '#2e8b57']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            updateStatusChart() {
+                const active = this.patients.filter(p => p.status === 'active').length;
+                const completed = this.patients.filter(p => p.status === 'completed').length;
+
+                const ctx = document.getElementById('statusChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.statusChart) window.statusChart.destroy();
+                window.statusChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Active', 'Completed'],
+                        datasets: [{
+                            data: [active, completed],
+                            backgroundColor: ['#b34a00', '#1f5e3a']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateMonthlyTrends() {
+                const monthly = {};
+                this.patients.forEach(p => {
+                    if (p.registrationDate) {
+                        const month = p.registrationDate.slice(0, 7);
+                        monthly[month] = (monthly[month] || 0) + 1;
+                    }
+                });
+
+                const ctx = document.getElementById('monthlyTrendsChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.monthlyTrendsChart) window.monthlyTrendsChart.destroy();
+                window.monthlyTrendsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(monthly).sort(),
+                        datasets: [{
+                            label: 'Patient Visits',
+                            data: Object.values(monthly),
+                            borderColor: '#004c97',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateClassDistribution() {
+                const classes = {};
+                this.patients.forEach(p => {
+                    if (p.class) {
+                        classes[p.class] = (classes[p.class] || 0) + 1;
+                    }
+                });
+
+                const ctx = document.getElementById('classDistributionChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.classChart) window.classChart.destroy();
+                window.classChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(classes).length ? Object.keys(classes) : ['No Data'],
+                        datasets: [{
+                            data: Object.keys(classes).length ? Object.values(classes) : [1],
+                            backgroundColor: ['#004c97', '#1f5e3a', '#b34a00', '#6a4e9a', '#c02f2f', '#2e8b57']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateMonthlyComparison() {
+                const ctx = document.getElementById('monthlyComparisonChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const months = [];
+                const counts = [];
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - i);
+                    const month = d.toISOString().slice(0, 7);
+                    months.push(month);
+                    counts.push(this.patients.filter(p => p.registrationDate?.startsWith(month)).length);
+                }
+
+                if (window.monthlyComparisonChart) window.monthlyComparisonChart.destroy();
+                window.monthlyComparisonChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'New Cases',
+                            data: counts,
+                            borderColor: '#004c97',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateRecoveryRate() {
+                const ctx = document.getElementById('recoveryRateChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const active = this.patients.filter(p => p.status === 'active').length;
+                const recovered = this.patients.filter(p => p.status === 'completed').length;
+
+                if (window.recoveryChart) window.recoveryChart.destroy();
+                window.recoveryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Recovered'],
+                        datasets: [{
+                            data: [active, recovered],
+                            backgroundColor: ['#b34a00', '#1f5e3a']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateInventoryDisplay() {
+                const grid = document.getElementById('inventoryGrid');
+                grid.innerHTML = this.inventory.map(item => {
+                    const stockPercent = (item.quantity / (item.reorderLevel * 3)) * 100;
+                    let stockClass = '';
+                    if (item.quantity <= item.reorderLevel) stockClass = 'critical';
+                    else if (item.quantity <= item.reorderLevel * 2) stockClass = 'low';
+
+                    return `
+                        <div class="inventory-card">
+                            <h4 style="margin-bottom: 1rem;">${item.name || 'Unknown'}</h4>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Quantity: <strong>${item.quantity || 0}</strong></span>
+                                    <span>Reorder at: ${item.reorderLevel || 0}</span>
+                                </div>
+                                <div class="stock-level">
+                                    <div class="stock-fill ${stockClass}" style="width: ${Math.min(stockPercent, 100)}%"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-lookup" onclick="system.showStockDialog('${item.name}', ${item.quantity}, ${item.reorderLevel}, ${item.price})" style="flex: 1;">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="btn-email" onclick="system.dispenseStock(${item.id})" style="flex: 1;">
+                                    <i class="fas fa-arrow-right"></i> Dispense
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Update dispensing log
+                const logBody = document.getElementById('dispensingLogBody');
+                const recentLog = this.dispensingLog.slice(-10).reverse();
+                logBody.innerHTML = recentLog.map(d => `
+                    <tr>
+                        <td>${d.date || 'N/A'}</td>
+                        <td>${d.medication || 'N/A'}</td>
+                        <td>${d.quantity || 0}</td>
+                        <td>${d.patient || 'N/A'}</td>
+                        <td>${d.nurse || 'System'}</td>
+                    </tr>
+                `).join('');
+
+                if (recentLog.length === 0) {
+                    logBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No dispensing records</td></tr>';
+                }
+            }
+
+            updateDatabaseView() {
+                const view = document.getElementById('dbTableView').value;
+                const container = document.getElementById('databaseTableContainer');
+
+                let data = [];
+                let headers = [];
+
+                switch(view) {
+                    case 'patients':
+                        data = this.patients;
+                        headers = ['ID', 'Name', 'Class', 'Age', 'Gender', 'Status', 'Registration Date'];
+                        break;
+                    case 'medications':
+                        data = this.patients.flatMap(p => 
+                            (p.medications || []).map(m => ({ ...m, patientId: p.id, patientName: p.name }))
+                        );
+                        headers = ['Patient', 'Medication', 'Dosage', 'Times/Day', 'Duration', 'Status'];
+                        break;
+                    case 'referrals':
+                        data = this.patients.filter(p => p.referral).map(p => ({
+                            patientId: p.id,
+                            patientName: p.name,
+                            ...p.referral
+                        }));
+                        headers = ['Patient', 'Referred To', 'Time', 'Reason', 'Follow-up'];
+                        break;
+                    case 'inventory':
+                        data = this.inventory;
+                        headers = ['Medication', 'Quantity', 'Reorder Level', 'Price', 'Unit'];
+                        break;
+                    case 'dispensing':
+                        data = this.dispensingLog;
+                        headers = ['Date', 'Medication', 'Quantity', 'Patient', 'Nurse'];
+                        break;
+                }
+
+                container.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                ${headers.map(h => `<th>${h}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.length ? data.map(item => {
+                                const row = [];
+                                switch(view) {
+                                    case 'patients':
+                                        row.push(
+                                            item.id || '',
+                                            item.name || '',
+                                            `${item.class || ''} ${item.stream || ''}`,
+                                            item.age || '',
+                                            item.gender || '',
+                                            `<span class="patient-status status-${item.status || ''}">${item.status || ''}</span>`,
+                                            item.registrationDate ? new Date(item.registrationDate).toLocaleDateString() : ''
+                                        );
+                                        break;
+                                    case 'medications':
+                                        row.push(
+                                            `${item.patientName || ''} (${item.patientId || ''})`,
+                                            item.name || '',
+                                            item.dosage || '',
+                                            item.timesPerDay || '',
+                                            item.duration || '',
+                                            item.status || ''
+                                        );
+                                        break;
+                                    case 'referrals':
+                                        row.push(
+                                            `${item.patientName || ''} (${item.patientId || ''})`,
+                                            item.to || '',
+                                            item.time || '',
+                                            item.reason || '',
+                                            item.followup || ''
+                                        );
+                                        break;
+                                    case 'inventory':
+                                        row.push(
+                                            item.name || '',
+                                            item.quantity || 0,
+                                            item.reorderLevel || 0,
+                                            item.price ? `$${item.price}` : '$0',
+                                            item.unit || ''
+                                        );
+                                        break;
+                                    case 'dispensing':
+                                        row.push(
+                                            item.date || '',
+                                            item.medication || '',
+                                            item.quantity || 0,
+                                            item.patient || '',
+                                            item.nurse || ''
+                                        );
+                                        break;
+                                }
+                                return `<tr>${row.map(r => `<td>${r}</td>`).join('')}</tr>`;
+                            }).join('') : '<tr><td colspan="100" style="text-align: center;">No data available</td></tr>'}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            showStockDialog(name = '', quantity = 0, reorder = 0, price = 0) {
+                document.getElementById('stockName').value = name;
+                document.getElementById('stockQuantity').value = quantity;
+                document.getElementById('stockReorder').value = reorder;
+                document.getElementById('stockPrice').value = price;
+                document.getElementById('stockDialog').style.display = 'flex';
+            }
+
+            async importExcelFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                            
+                            // Get headers from first row
+                            const headers = jsonData[0] || [];
+                            const rows = jsonData.slice(1);
+                            
+                            // Map to objects
+                            const students = rows.map(row => {
+                                const student = {};
+                                headers.forEach((header, index) => {
+                                    if (header) {
+                                        const key = header.trim().toLowerCase();
+                                        const value = row[index];
+                                        
+                                        // Map common header names
+                                        if (key.includes('name')) student.name = value;
+                                        else if (key.includes('class')) student.class = value;
+                                        else if (key.includes('stream')) student.stream = value;
+                                        else if (key.includes('age')) student.age = parseInt(value) || null;
+                                        else if (key.includes('gender')) student.gender = value;
+                                        else if (key.includes('contact')) student.contact = value;
+                                    }
+                                });
+                                
+                                // Only include if we have at least a name
+                                if (student.name) {
+                                    return {
+                                        ...student,
+                                        id: Date.now() + Math.random(),
+                                        importDate: new Date().toISOString()
+                                    };
+                                }
+                                return null;
+                            }).filter(s => s !== null);
+                            
+                            resolve(students);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(reader.error);
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            async importCsvFile(file) {
+                return new Promise((resolve, reject) => {
+                    PapaParse.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            try {
+                                const students = results.data
+                                    .filter(row => {
+                                        // Check if row has at least a name field
+                                        const nameField = Object.values(row).find(v => v && v.toString().trim());
+                                        return nameField;
+                                    })
+                                    .map((row, index) => {
+                                        const student = {
+                                            id: Date.now() + index,
+                                            importDate: new Date().toISOString()
+                                        };
+                                        
+                                        // Map all fields, normalizing headers
+                                        Object.keys(row).forEach(key => {
+                                            const normalizedKey = key.trim().toLowerCase();
+                                            const value = row[key];
+                                            
+                                            if (normalizedKey.includes('name')) student.name = value;
+                                            else if (normalizedKey.includes('class')) student.class = value;
+                                            else if (normalizedKey.includes('stream')) student.stream = value;
+                                            else if (normalizedKey.includes('age')) student.age = parseInt(value) || null;
+                                            else if (normalizedKey.includes('gender')) student.gender = value;
+                                            else if (normalizedKey.includes('contact')) student.contact = value;
+                                        });
+                                        
+                                        return student;
+                                    });
+                                
+                                resolve(students);
+                            } catch (error) {
+                                reject(error);
+                            }
+                        },
+                        error: (error) => reject(error)
+                    });
+                });
+            }
+
+            async handleFileImport(file) {
+                const progressDiv = document.getElementById('importProgress');
+                const progressBar = document.getElementById('importProgressBar');
+                const statusEl = document.getElementById('importStatus');
+                
+                progressDiv.style.display = 'block';
+                statusEl.textContent = 'Reading file...';
+                progressBar.style.width = '30%';
+                
+                try {
+                    let students = [];
+                    
+                    if (file.name.endsWith('.csv')) {
+                        statusEl.textContent = 'Processing CSV...';
+                        progressBar.style.width = '50%';
+                        students = await this.importCsvFile(file);
+                    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        statusEl.textContent = 'Processing Excel...';
+                        progressBar.style.width = '50%';
+                        students = await this.importExcelFile(file);
+                    } else {
+                        throw new Error('Unsupported file type. Please upload CSV or Excel file.');
+                    }
+                    
+                    progressBar.style.width = '80%';
+                    statusEl.textContent = `Validating ${students.length} records...`;
+                    
+                    // Validate and clean data
+                    const validStudents = students.filter(s => {
+                        return s.name && s.name.toString().trim();
+                    });
+                    
+                    if (validStudents.length === 0) {
+                        throw new Error('No valid student records found. Please check file format.');
+                    }
+                    
+                    progressBar.style.width = '90%';
+                    statusEl.textContent = `Saving ${validStudents.length} students...`;
+                    
+                    // Add to database
+                    this.studentDatabase = [...this.studentDatabase, ...validStudents];
+                    this.saveStudentDatabase();
+                    
+                    // Update datalist for lookup
+                    const datalist = document.getElementById('studentList');
+                    datalist.innerHTML = '';
+                    this.studentDatabase.forEach(s => {
+                        if (s.name) {
+                            const option = document.createElement('option');
+                            option.value = s.name;
+                            datalist.appendChild(option);
+                        }
+                    });
+                    
+                    progressBar.style.width = '100%';
+                    statusEl.textContent = `✓ Successfully imported ${validStudents.length} students!`;
+                    
+                    setTimeout(() => {
+                        document.getElementById('importDialog').style.display = 'none';
+                        progressDiv.style.display = 'none';
+                    }, 1500);
+                    
+                    return validStudents;
+                    
+                } catch (error) {
+                    console.error('Import error:', error);
+                    statusEl.textContent = `✗ Error: ${error.message}`;
+                    progressBar.style.width = '0%';
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 3000);
+                    throw error;
+                }
+            }
+
+            setupEventListeners() {
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-theme');
+                    const icon = document.querySelector('#themeToggle i');
+                    if (document.body.classList.contains('dark-theme')) {
+                        icon.className = 'fas fa-moon';
+                    } else {
+                        icon.className = 'fas fa-sun';
+                    }
+                });
+
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        
+                        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                        
+                        // Refresh views when switching tabs
+                        if (tab.dataset.tab === 'database') {
+                            this.updateDatabaseView();
+                        } else if (tab.dataset.tab === 'statistics') {
+                            this.updateAllCharts();
+                        } else if (tab.dataset.tab === 'inventory') {
+                            this.updateInventoryDisplay();
+                        }
+                    });
+                });
+
+                // Patient search
+                const patientSearch = document.getElementById('patientSearch');
+                if (patientSearch) {
+                    patientSearch.addEventListener('input', () => {
+                        this.renderPatientList();
+                    });
+                }
+
+                // Register patient
+                document.getElementById('registerPatientBtn').addEventListener('click', () => {
+                    const medications = [];
+                    document.querySelectorAll('.drug-entry').forEach(div => {
+                        const nameInput = div.querySelector('.drug-name');
+                        if (nameInput && nameInput.value) {
+                            medications.push({
+                                name: nameInput.value,
+                                dosage: div.querySelector('.drug-dosage')?.value || '',
+                                duration: parseInt(div.querySelector('.drug-duration')?.value) || 3,
+                                timesPerDay: parseInt(div.querySelector('.drug-times')?.value) || 2,
+                                status: 'active'
+                            });
+                        }
+                    });
+
+                    const referral = document.getElementById('hasReferral').checked ? {
+                        to: document.getElementById('referralTo').value,
+                        time: document.getElementById('referralTime').value,
+                        reason: document.getElementById('referralReason').value,
+                        followup: document.getElementById('followupDate').value
+                    } : null;
+
+                    const patientData = {
+                        name: document.getElementById('patientName').value,
+                        class: document.getElementById('patientClass').value,
+                        stream: document.getElementById('patientStream').value,
+                        age: parseInt(document.getElementById('patientAge').value) || null,
+                        gender: document.getElementById('patientGender').value,
+                        contact: document.getElementById('patientContact').value,
+                        symptoms: document.getElementById('patientSymptoms').value,
+                        notes: document.getElementById('patientNotes').value,
+                        medications: medications,
+                        referral: referral
+                    };
+
+                    if (!patientData.name) {
+                        alert('Please enter patient name');
+                        return;
+                    }
+
+                    const patient = this.registerPatient(patientData);
+                    alert(`Patient registered successfully! ID: ${patient.id}`);
+                    
+                    // Reset form
+                    document.getElementById('patientName').value = '';
+                    document.getElementById('patientAge').value = '';
+                    document.getElementById('patientContact').value = '';
+                    document.getElementById('patientSymptoms').value = '';
+                    document.getElementById('patientNotes').value = '';
+                    document.getElementById('hasReferral').checked = false;
+                    document.getElementById('referralDetails').classList.remove('active');
+                    
+                    // Reset medications
+                    document.getElementById('medicationsList').innerHTML = '';
+                    this.addMedicationRow();
+                });
+
+                // Referral toggle
+                document.getElementById('hasReferral').addEventListener('change', (e) => {
+                    document.getElementById('referralDetails').classList.toggle('active', e.target.checked);
+                });
+
+                // Add medication
+                document.getElementById('addMedicationBtn').addEventListener('click', () => {
+                    this.addMedicationRow();
+                });
+
+                // Student lookup
+                document.getElementById('lookupStudentBtn').addEventListener('click', () => {
+                    const search = document.getElementById('studentSearch').value.toLowerCase();
+                    const student = this.studentDatabase.find(s => 
+                        s.name?.toLowerCase().includes(search)
+                    );
+                    
+                    if (student) {
+                        document.getElementById('patientName').value = student.name || '';
+                        document.getElementById('patientClass').value = student.class || 'S.1';
+                        document.getElementById('patientStream').value = student.stream || 'East';
+                        document.getElementById('patientAge').value = student.age || '';
+                        document.getElementById('patientGender').value = student.gender || 'Male';
+                        document.getElementById('patientContact').value = student.contact || '';
+                    } else {
+                        alert('Student not found in database');
+                    }
+                });
+
+                // Stock dialog
+                document.getElementById('addStockBtn').addEventListener('click', () => {
+                    this.showStockDialog();
+                });
+
+                document.getElementById('cancelStockBtn').addEventListener('click', () => {
+                    document.getElementById('stockDialog').style.display = 'none';
+                });
+
+                document.getElementById('saveStockBtn').addEventListener('click', () => {
+                    const name = document.getElementById('stockName').value;
+                    const quantity = parseInt(document.getElementById('stockQuantity').value) || 0;
+                    const reorder = parseInt(document.getElementById('stockReorder').value) || 0;
+                    const price = parseFloat(document.getElementById('stockPrice').value) || 0;
+
+                    if (!name) {
+                        alert('Please enter medication name');
+                        return;
+                    }
+
+                    const existing = this.inventory.find(i => i.name?.toLowerCase() === name.toLowerCase());
+                    if (existing) {
+                        existing.quantity = quantity;
+                        existing.reorderLevel = reorder;
+                        existing.price = price;
+                    } else {
+                        this.inventory.push({
+                            id: this.inventory.length + 1,
+                            name: name,
+                            quantity: quantity,
+                            reorderLevel: reorder,
+                            price: price,
+                            unit: 'units'
+                        });
+                    }
+
+                    this.saveInventory();
+                    this.updateInventoryDisplay();
+                    document.getElementById('stockDialog').style.display = 'none';
+                });
+
+                // Database view selector
+                document.getElementById('dbTableView').addEventListener('change', () => {
+                    this.updateDatabaseView();
+                });
+
+                // Export buttons
+                document.getElementById('exportPatientsBtn').addEventListener('click', () => {
+                    this.exportData('patients');
+                });
+
+                document.getElementById('exportInventoryBtn').addEventListener('click', () => {
+                    this.exportData('inventory');
+                });
+
+                document.getElementById('generateFullReport').addEventListener('click', () => {
+                    this.exportFullReport();
+                });
+
+                document.getElementById('backupDatabaseBtn').addEventListener('click', () => {
+                    this.backupDatabase();
+                });
+
+                // Import students button
+                document.getElementById('importStudentsBtn').addEventListener('click', () => {
+                    document.getElementById('importFile').value = ''; // Clear previous selection
+                    document.getElementById('importProgress').style.display = 'none';
+                    document.getElementById('importDialog').style.display = 'flex';
+                });
+
+                document.getElementById('cancelImportBtn').addEventListener('click', () => {
+                    document.getElementById('importDialog').style.display = 'none';
+                });
+
+                document.getElementById('confirmImportBtn').addEventListener('click', async () => {
+                    const fileInput = document.getElementById('importFile');
+                    const file = fileInput.files[0];
+                    
+                    if (!file) {
+                        alert('Please select a file to import');
+                        return;
+                    }
+
+                    try {
+                        await this.handleFileImport(file);
+                    } catch (error) {
+                        alert(`Import failed: ${error.message}`);
+                    }
+                });
+
+                // Restore database
+                document.getElementById('restoreDatabaseBtn').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = (e) => {
+                            try {
+                                const backup = JSON.parse(e.target.result);
+                                
+                                if (backup.patients) this.patients = backup.patients;
+                                if (backup.inventory) this.inventory = backup.inventory;
+                                if (backup.dispensingLog) this.dispensingLog = backup.dispensingLog;
+                                if (backup.studentDatabase) this.studentDatabase = backup.studentDatabase;
+                                
+                                this.savePatients();
+                                this.saveInventory();
+                                this.saveDispensing();
+                                this.saveStudentDatabase();
+                                
+                                this.refreshUI();
+                                this.updateInventoryDisplay();
+                                this.updateDatabaseView();
+                                
+                                alert('Database restored successfully!');
+                            } catch (error) {
+                                alert('Error restoring database: ' + error.message);
+                            }
+                        };
+                        
+                        reader.readAsText(file);
+                    };
+                    
+                    input.click();
+                });
+
+                // Optimize database
+                document.getElementById('optimizeDatabaseBtn').addEventListener('click', () => {
+                    // Remove duplicate entries and clean data
+                    const uniquePatients = [];
+                    const seenIds = new Set();
+                    
+                    this.patients.forEach(p => {
+                        if (p.id && !seenIds.has(p.id)) {
+                            seenIds.add(p.id);
+                            uniquePatients.push(p);
+                        }
+                    });
+                    
+                    if (uniquePatients.length !== this.patients.length) {
+                        this.patients = uniquePatients;
+                        this.savePatients();
+                        alert(`Optimized database: removed ${this.patients.length - uniquePatients.length} duplicate entries`);
+                    } else {
+                        alert('Database is already optimized');
+                    }
+                    
+                    this.refreshUI();
+                });
+
+                // Mark completed button
+                document.getElementById('markCompletedBtn').addEventListener('click', () => {
+                    const patientId = document.getElementById('detailPatientId').textContent;
+                    if (patientId && patientId !== 'N/A') {
+                        this.markPatientCompleted(patientId);
+                    }
+                });
+
+                // Email report
+                document.getElementById('emailReportBtn').addEventListener('click', () => {
+                    const subject = encodeURIComponent('Pulse Healthcare Report');
+                    const body = encodeURIComponent(
+                        `Healthcare Report\n\n` +
+                        `Total Patients: ${this.patients.length}\n` +
+                        `Active: ${this.patients.filter(p => p.status === 'active').length}\n` +
+                        `Recovered: ${this.patients.filter(p => p.status === 'completed').length}\n` +
+                        `Generated: ${new Date().toLocaleString()}`
+                    );
+                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                });
+
+                // Generate monthly report
+                document.getElementById('generateMonthlyReport').addEventListener('click', () => {
+                    const thisMonth = new Date().toISOString().slice(0, 7);
+                    const monthlyPatients = this.patients.filter(p => 
+                        p.registrationDate?.startsWith(thisMonth)
+                    );
+                    
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(monthlyPatients);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Monthly Report');
+                    XLSX.writeFile(wb, `monthly_report_${thisMonth}.xlsx`);
+                });
+
+                // Initialize with one medication row
+                this.addMedicationRow();
+            }
+
+            addMedicationRow() {
+                const container = document.getElementById('medicationsList');
+                const div = document.createElement('div');
+                div.className = 'drug-entry';
+                div.innerHTML = `
+                    <input type="text" class="form-control drug-name" placeholder="Medication" list="medicationList">
+                    <input type="text" class="form-control drug-dosage" placeholder="Dosage">
+                    <input type="number" class="form-control drug-duration" placeholder="Days" value="3" min="1" style="width: 80px;">
+                    <select class="form-control drug-times" style="width: 70px;">
+                        <option value="1">1x</option>
+                        <option value="2" selected>2x</option>
+                        <option value="3">3x</option>
+                    </select>
+                    <button class="btn-remove-drug"><i class="fas fa-times"></i></button>
+                `;
+
+                div.querySelector('.btn-remove-drug').addEventListener('click', () => {
+                    if (document.querySelectorAll('.drug-entry').length > 1) {
+                        div.remove();
+                    }
+                });
+
+                container.appendChild(div);
+            }
+
+            exportData(type) {
+                let data = [];
+                let filename = '';
+
+                switch(type) {
+                    case 'patients':
+                        data = this.patients.map(p => ({
+                            ID: p.id,
+                            Name: p.name,
+                            Class: p.class,
+                            Stream: p.stream,
+                            Age: p.age,
+                            Gender: p.gender,
+                            Contact: p.contact,
+                            Symptoms: p.symptoms,
+                            Status: p.status,
+                            'Registration Date': p.registrationDate
+                        }));
+                        filename = `patients_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                        break;
+                    case 'inventory':
+                        data = this.inventory;
+                        filename = `inventory_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                        break;
+                }
+
+                if (data.length) {
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                    XLSX.writeFile(wb, filename);
+                } else {
+                    alert('No data to export');
+                }
+            }
+
+            exportFullReport() {
+                const wb = XLSX.utils.book_new();
+
+                // Patients sheet
+                const patientsData = this.patients.map(p => ({
+                    ID: p.id,
+                    Name: p.name,
+                    Class: p.class,
+                    Stream: p.stream,
+                    Age: p.age,
+                    Gender: p.gender,
+                    Symptoms: p.symptoms,
+                    Status: p.status,
+                    'Registration Date': p.registrationDate
+                }));
+                const patientsWs = XLSX.utils.json_to_sheet(patientsData);
+                XLSX.utils.book_append_sheet(wb, patientsWs, 'Patients');
+
+                // Inventory sheet
+                const inventoryWs = XLSX.utils.json_to_sheet(this.inventory);
+                XLSX.utils.book_append_sheet(wb, inventoryWs, 'Inventory');
+
+                // Dispensing sheet
+                const dispensingWs = XLSX.utils.json_to_sheet(this.dispensingLog);
+                XLSX.utils.book_append_sheet(wb, dispensingWs, 'Dispensing Log');
+
+                XLSX.writeFile(wb, `pulse_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            }
+
+            backupDatabase() {
+                const backup = {
+                    patients: this.patients,
+                    inventory: this.inventory,
+                    dispensingLog: this.dispensingLog,
+                    studentDatabase: this.studentDatabase,
+                    timestamp: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(backup, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pulse_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                document.getElementById('dbLastBackup').textContent = new Date().toLocaleString();
+            }
+
+            dispenseStock(itemId) {
+                const item = this.inventory.find(i => i.id === itemId);
+                if (item && item.quantity > 0) {
+                    item.quantity--;
+                    this.dispensingLog.push({
+                        id: Date.now(),
+                        date: new Date().toISOString().slice(0, 10),
+                        medication: item.name,
+                        quantity: 1,
+                        patient: 'Manual Dispense',
+                        nurse: 'System'
+                    });
+                    this.saveInventory();
+                    this.saveDispensing();
+                    this.updateInventoryDisplay();
+                } else if (item && item.quantity <= 0) {
+                    alert('Out of stock!');
+                }
+            }
+        }
+
+        // Initialize the system
+        const system = new HealthcareSystem();
+        window.system = system;
+    </script>
+    <footer class="site-footer">
+  <div class="footer-content">
+    <p class="footer-title">Pulse <span>by JicoICTClub 2026.</span></p>
+    <p class="footer-credits">
+      Made by
+      <span>Wodelo Joshua</span>,
+      <span>Mukisa Minjo</span>,
+      <span>Myokos Kweko</span> &
+      <span>Ogwang Daniel</span>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

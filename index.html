@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Pulse · JICO Sickbay · offline local DB</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Chart.js 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(155deg, #e4ecf7 0%, #d0dfef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1600px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 55px -25px #102a4e, 0 0 0 1px rgba(255,255,255,0.8) inset;
+            padding: 1.5rem 1.8rem 2rem;
+            transition: all 0.2s;
+        }
+
+        @media (max-width: 720px) {
+            .app-container { padding: 1rem 1rem 1.5rem; border-radius: 2rem; }
+        }
+
+        .pulse-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { background: #002b4e; width: 48px; height: 48px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; color: white; }
+        .logo-text h1 { font-size: 1.9rem; font-weight: 700; color: #0f2b45; line-height: 1.2; }
+        .logo-text .tag { background: #ffffffd0; padding: 0.2rem 1.2rem; border-radius: 40px; font-weight: 500; color: #1e4b77; font-size: 0.8rem; border: 1px solid white; }
+
+        .jico-badge { background: #ffffffcc; padding: 0.5rem 1.6rem; border-radius: 60px; font-weight: 600; color: #0f2e48; border: 1px solid white; }
+
+        .tab-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1.2rem 0 1.8rem;
+            border-bottom: 2px solid rgba(255,255,255,0.5);
+            padding-bottom: 0.3rem;
+        }
+        .tab {
+            background: transparent; border: none; padding: 0.6rem 1.5rem; font-weight: 600; color: #1f4a77; border-radius: 40px 40px 0 0; cursor: pointer; font-size: 0.95rem;
+        }
+        .tab i { margin-right: 6px; }
+        .tab.active { background: rgba(255,255,255,0.85); color: #00315c; }
+        .tab-pane { display: none; animation: fade 0.25s; }
+        .tab-pane.active { display: block; }
+        @keyframes fade { 0% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
+        .stat-card { background: #ffffffee; border-radius: 40px; padding: 0.7rem 1.8rem; display: flex; align-items: center; gap: 14px; flex: 1 1 150px; border: 1px solid white; box-shadow: 0 8px 22px -16px #002b4e; }
+        .stat-icon { background: #e8f0fe; width: 44px; height: 44px; border-radius: 26px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1d4e7c; }
+        .stat-info h3 { font-size: 1.8rem; font-weight: 700; color: #052945; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2.2fr;
+            gap: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 880px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .register-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2.2rem; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.8); }
+        .section-title { font-size: 1.3rem; color: #11355e; margin-bottom: 1.2rem; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .student-lookup { background: #eef5ff; border-radius: 60px; padding: 0.2rem 0.2rem 0.2rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem; margin-left: auto; border: 1px solid white; }
+        .student-lookup input { border: none; background: transparent; padding: 0.4rem; width: 130px; outline: none; font-size: 0.9rem; }
+        .student-lookup button { background: #00315c; border: none; color: white; border-radius: 40px; padding: 0.4rem 1rem; font-weight: 500; cursor: pointer; }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #1f4465; }
+        .input-field { width: 100%; background: rgba(255,255,255,0.9); border: 1.5px solid #dae2ed; border-radius: 30px; padding: 0.75rem 1.3rem; font-size: 0.9rem; outline: none; }
+        .input-field:focus { border-color: #0077be; box-shadow: 0 0 0 3px #0077be30; }
+        .inline-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+        .drugs-section { background: rgba(255,255,255,0.5); border-radius: 26px; padding: 1rem 0.8rem; margin: 0.8rem 0; border: 1px solid #d0dff0; }
+        .drug-entry { display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; background: white; border-radius: 60px; padding: 0.5rem 1rem; margin-bottom: 0.7rem; }
+        .drug-entry input, .drug-entry select { background: white; border: 1px solid #c7d8ec; border-radius: 40px; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .drug-name { flex: 2; min-width: 120px; } .drug-dosage { flex: 1; min-width: 80px; } .drug-duration { width: 70px; } .drug-times { width: 60px; } .remove-drug { background: none; border: none; color: #b00; font-size: 1.3rem; }
+        .btn-add-drug { background: rgba(255,255,255,0.8); border: 1px dashed #3670b3; border-radius: 50px; padding: 0.4rem 1.2rem; font-weight: 500; color: #175d9e; cursor: pointer; }
+        .btn-primary { background: #00315c; color: white; border: none; border-radius: 60px; padding: 0.9rem; font-weight: 600; width: 100%; cursor: pointer; margin-top: 1rem; box-shadow: 0 6px 16px #00315c60; }
+
+        .right-col { display: flex; flex-direction: column; gap: 1.5rem; }
+        .records-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2rem; border: 1px solid white; display: flex; flex-direction: column; max-height: 360px; overflow: hidden; }
+        .panel-header { padding: 1rem 1.5rem; border-bottom: 1px solid #eef3f9; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+        .search-box { background: rgba(255,255,255,0.8); border-radius: 50px; padding: 0.2rem 1rem; display: flex; align-items: center; gap: 6px; }
+        .search-box input { border: none; background: transparent; padding: 0.5rem 0; width: 150px; outline: none; }
+        .student-list { list-style: none; overflow-y: auto; padding: 0.5rem 1rem 0.5rem 1.5rem; flex: 1; }
+        .student-item { background: rgba(255,255,255,0.7); border-radius: 30px; margin-bottom: 0.5rem; padding: 0.8rem 1.2rem; border: 1px solid white; cursor: pointer; transition: 0.1s; }
+        .student-item:hover { background: white; transform: translateX(4px); }
+        .student-item.selected { background: #ffffff; border-left: 6px solid #004c97; }
+
+        .detail-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.4rem; border: 1px solid white; }
+        .dose-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 10px 0; }
+        .dose-icons i { font-size: 1.8rem; margin-right: 8px; cursor: pointer; color: #2d6390; }
+        .dose-icons i.fa-check-circle { color: #2fc48d; } .dose-icons i.fa-times-circle { color: #c02f2f; } .dose-icons i.fa-circle { color: #b3c9e0; }
+
+        .stats-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2.2rem; padding: 1.8rem; border: 1px solid white; margin-top: 1rem; }
+        .import-section { background: rgba(255,255,255,0.5); border-radius: 2rem; padding: 1.2rem; margin-bottom: 2rem; border: 1px solid white; }
+        .import-btn { background: #2e5a8b; color: white; border: none; border-radius: 60px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer; }
+        .charts-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .chart-box { flex: 1 1 280px; background: rgba(255,255,255,0.7); border-radius: 1.8rem; padding: 1.2rem; height: 250px; }
+        .missed-list { background: #ffffffc0; border-radius: 2rem; padding: 1.2rem; margin: 1.5rem 0; }
+        .missed-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #cddef5; }
+        .btn-excel { background: #1f5e3a; color: white; border: none; border-radius: 60px; padding: 0.8rem 2rem; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px #1f5e3a70; }
+        .btn-email { background: #004c97; color: white; border: none; border-radius: 60px; padding: 0.8rem 2rem; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px #004c9770; }
+
+        .footer-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; background: #ffffffb0; border-radius: 60px; padding: 0.7rem 2rem; border: 1px solid white; }
+        @media (max-width: 600px) {
+            .footer-stats { flex-direction: column; gap: 0.5rem; }
+        }
+        
+        /* Save and Email Dialogs */
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dialog {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 30px 60px rgba(0,20,40,0.3);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        
+        .dialog h3 {
+            color: #00315c;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .dialog input, .dialog textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #dae2ed;
+            border-radius: 60px;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .dialog textarea {
+            border-radius: 30px;
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .dialog-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .dialog-btn.cancel {
+            background: #eef3f9;
+            color: #2d6390;
+        }
+        
+        .dialog-btn.save {
+            background: #1f5e3a;
+            color: white;
+        }
+        
+        .dialog-btn.email {
+            background: #004c97;
+            color: white;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        .status-success {
+            background: #2fc48d20;
+            color: #1f5e3a;
+            border: 1px solid #2fc48d;
+        }
+        
+        .status-info {
+            background: #004c9720;
+            color: #004c97;
+            border: 1px solid #004c97;
+        }
+        
+        .folder-path {
+            background: #eef3f9;
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="pulse-header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-heart-pulse"></i></div>
+            <div class="logo-text"><h1>Pulse</h1><span class="tag"><i class="far fa-clock"></i> JICO sickbay · offline local DB</span></div>
+        </div>
+        <div class="jico-badge">
+            <i class="fas fa-folder"></i> 
+            <span id="dataFolderStatus">Pulse_Files</span>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab active" id="tabMain"><i class="fas fa-clinic-medical"></i> Sickbay</button>
+        <button class="tab" id="tabStats"><i class="fas fa-chart-pie"></i> Statistics & exports</button>
+    </div>
+
+    <!-- main pane -->
+    <div id="paneMain" class="tab-pane active">
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-icon"><i class="fas-regular fa-notes-medical"></i></div><div class="stat-info"><h3 id="total-visits">0</h3><p>Visits</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-pills"></i></div><div class="stat-info"><h3 id="ongoing-count">0</h3><p>ongoing meds</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-list-check"></i></div><div class="stat-info"><h3 id="adherence-today">0%</h3><p>today adherence</p></div></div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- left register with student lookup -->
+            <div class="register-panel">
+                <div class="section-title">
+                    <i class="fas fa-user-plus"></i> Register sick student
+                    <div class="student-lookup">
+                        <i class="fas fa-search" style="color:#2d6390;"></i>
+                        <input type="text" id="lookupStudentName" placeholder="search imported student" list="studentNameList">
+                        <button id="fillFromLookupBtn"><i class="fas fa-file-import"></i> Fill</button>
+                    </div>
+                </div>
+                <datalist id="studentNameList"></datalist>
+                
+                <div class="input-group"><label>Full name</label><input type="text" class="input-field" id="student-name" placeholder="name" value="James Okoro"></div>
+                <div class="inline-2col">
+                    <div class="input-group"><label>Class</label>
+                        <select class="input-field" id="student-class">
+                            <option>S.1</option><option>S.2</option><option>S.3</option><option>S.4</option><option>S.5</option><option>S.6</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>Stream</label>
+                        <select class="input-field" id="student-stream">
+                            <option>East</option><option>West</option><option>North</option><option>South</option><option>Central</option>
+                            <option>Arts</option><option>Sciences</option><option>Biological</option><option>Physical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="inline-2col">
+                    <div class="input-group"><label>Age</label><input type="number" class="input-field" id="age" value="15"></div>
+                    <div class="input-group"><label>Gender</label><input type="text" class="input-field" id="gender" value="Male" disabled></div>
+                </div>
+                <div class="input-group"><label>Symptoms</label><input type="text" class="input-field" id="symptoms" value="Fever, cough"></div>
+                <div class="drugs-section">
+                    <div style="margin-bottom:6px;"><i class="fas fa-prescription"></i> Prescriptions</div>
+                    <div id="drug-list"></div>
+                    <button class="btn-add-drug" type="button" id="addDrugBtn"><i class="fas fa-plus-circle"></i> Add drug</button>
+                </div>
+                <button class="btn-primary" id="addStudentBtn"><i class="fas fa-floppy-disk"></i> Register (auto ID)</button>
+            </div>
+
+            <!-- right column -->
+            <div class="right-col">
+                <div class="records-panel">
+                    <div class="panel-header">
+                        <h5><i class="fas fa-folder-open"></i> Student visits · click for details</h5>
+                        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="search..." id="searchInput"></div>
+                    </div>
+                    <ul class="student-list" id="student-list-container"></ul>
+                </div>
+                <div class="detail-panel" id="patientDetailPanel">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:0.8rem;">
+                        <i class="fas fa-id-card fa-2x" style="color:#004c97;"></i>
+                        <span><strong id="detailName">Select a patient</strong> <span id="detailID" class="patient-tag" style="background:#dbeafe; padding:2px 10px; border-radius:40px;"></span></span>
+                    </div>
+                    <div id="emptyDetailMsg">👈 click on any student to track doses</div>
+                    <div id="detailContent" style="display: none;">
+                        <p><span id="detailClass"></span> · <span id="detailSymptoms"></span></p>
+                        <div><i class="fas fa-prescription-bottle"></i> <span id="detailDrugs"></span></div>
+                        <div class="dose-timetable" style="margin-top:1rem;">
+                            <h5><i class="fas fa-clock"></i> Today's doses (click to toggle)</h5>
+                            <div id="doseTrackingContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- statistics pane with import -->
+    <div id="paneStats" class="tab-pane">
+        <div class="stats-panel">
+            <div class="import-section">
+                <h4><i class="fas fa-upload"></i> Import student list (Excel/CSV)</h4>
+                <p style="font-size:0.9rem; margin:0.5rem 0;">Expected columns: Name, Class, Stream, Age, Gender (optional)</p>
+                <input type="file" id="importFile" accept=".csv, .xlsx, .xls, .ods">
+                <button class="import-btn" id="importBtn"><i class="fas fa-file-import"></i> Import & store locally</button>
+                <span id="importStatus" style="margin-left:1rem;"></span>
+            </div>
+            
+            <!-- Data folder info -->
+            <div class="folder-path" id="folderPathDisplay">
+                <i class="fas fa-folder-open"></i> Loading folder information...
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0;">
+                <h3><i class="fas fa-chart-line"></i> Live statistics & missed doses</h3>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Save to device</button>
+                    <button class="btn-email" id="emailReportBtn"><i class="fas fa-envelope"></i> Email report</button>
+                </div>
+            </div>
+            
+            <div class="charts-row">
+                <div class="chart-box"><canvas id="diseaseChart"></canvas></div>
+                <div class="chart-box"><canvas id="statusChart"></canvas></div>
+            </div>
+            <div class="missed-list">
+                <h4><i class="fas fa-exclamation-triangle" style="color:#b34a00;"></i> Students who missed doses (today)</h4>
+                <div id="missedDosesContainer">Loading...</div>
+            </div>
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem;">
+                <div class="stat-card"><span>Most frequent disease: <strong id="topDisease">—</strong></span></div>
+                <div class="stat-card"><span>7‑day adherence: <strong id="weeklyAdh">0%</strong></span></div>
+                <div class="stat-card"><span>Active patients: <strong id="activePatients">0</strong></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div class="footer-stats">
+        <span><i class="fas fa-flag"></i> follow‑up: <span id="followUpCount">0</span> missed doses</span>
+        <span><i class="fas fa-hashtag"></i> patient numbers: <span id="patientRange">P001...</span></span>
+        <span><i class="fas fa-check-circle" style="color:#2fc48d;"></i> today taken: <span id="takenCounter">0</span>/<span id="totalDosesCounter">0</span></span>
+    </div>
+</div>
+
+<!-- Save Dialog -->
+<div class="dialog-overlay" id="saveDialog">
+    <div class="dialog">
+        <h3><i class="fas fa-save"></i> Save Report to Device</h3>
+        <input type="text" id="saveFileName" placeholder="Enter filename (e.g., sickbay_report)" value="sickbay_report">
+        <div class="folder-path">
+            <i class="fas fa-folder"></i> Will be saved in: <span id="saveFolderPath">Pulse_Folder</span>
+        </div>
+        <div class="dialog-buttons">
+            <button class="dialog-btn cancel" id="cancelSaveBtn">Cancel</button>
+            <button class="dialog-btn save" id="confirmSaveBtn">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Email Dialog -->
+<div class="dialog-overlay" id="emailDialog">
+    <div class="dialog">
+        <h3><i class="fas fa-envelope"></i> Email Report to Administration</h3>
+        <input type="email" id="adminEmail" placeholder="Administration email address" value="admin@jicoschool.edu">
+        <input type="text" id="emailSubject" placeholder="Email subject" value="Sickbay Report">
+        <textarea id="emailMessage" placeholder="Additional message (optional)">Please find attached the latest sickbay report.</textarea>
+        <input type="text" id="emailFileName" placeholder="Filename for attachment" value="sickbay_report">
+        <div class="dialog-buttons">
+            <button class="dialog-btn cancel" id="cancelEmailBtn">Cancel</button>
+            <button class="dialog-btn email" id="confirmEmailBtn">Send Email</button>
+        </div>
+    </div>
+</div>
+
+<datalist id="drugSuggest">
+    <option value="Paracetamol"><option value="Amoxicillin"><option value="Artemether"><option value="Ibuprofen"><option value="Metronidazole"><option value="Cough syrup">
+</datalist>
+
+<script>
+(function() {
+    // ------------------------------------------------------------------
+    // OFFLINE LOCAL DATABASE with Pulse_Files folder in Documents
+    // ------------------------------------------------------------------
+    const DB_NAME = 'PulseFilesDB';
+    const DB_VERSION = 2;
+    const STUDENT_STORE = 'sickbayStudents';
+    const IMPORT_STORE = 'importedStudentList';
+    const SETTINGS_STORE = 'appSettings';
+
+    let db = null;
+    let students = [];
+    let importedStudents = [];
+    let appSettings = {
+        pulseFolderPath: '',
+        adminEmail: 'admin@jicoschool.edu'
+    };
+
+    // Open IndexedDB and set up stores
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = (e) => { console.error('DB error', e); reject(e); };
+            request.onsuccess = (e) => { 
+                db = e.target.result;
+                initializeApp();
+                resolve(db);
+            };
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(STUDENT_STORE)) {
+                    db.createObjectStore(STUDENT_STORE, { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains(IMPORT_STORE)) {
+                    db.createObjectStore(IMPORT_STORE, { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+                    db.createObjectStore(SETTINGS_STORE, { keyPath: 'key' });
+                }
+            };
+        });
+    }
+
+    // Initialize app: create Pulse_Files folder and load data
+    function initializeApp() {
+        // Check if pywebview is available
+        if (window.pywebview && window.pywebview.api) {
+            // Initialize Pulse_Files folder
+            window.pywebview.api.initialize_pulse_folder()
+                .then(result => {
+                    if (result.success) {
+                        appSettings.pulseFolderPath = result.folder_path;
+                        updateFolderDisplay();
+                        
+                        // Load data from files in the folder
+                        return window.pywebview.api.load_data_from_folder();
+                    }
+                })
+                .then(result => {
+                    if (result && result.success) {
+                        // Load data into memory
+                        if (result.students) {
+                            students = result.students;
+                        }
+                        if (result.imported_students) {
+                            importedStudents = result.imported_students;
+                        }
+                        refreshStudentNameList();
+                        refreshUI('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error initializing folder:', error);
+                    // Fallback to IndexedDB
+                    loadFromIndexedDB();
+                });
+        } else {
+            // Browser mode - use IndexedDB
+            document.getElementById('folderPathDisplay').innerHTML = 
+                '<i class="fas fa-info-circle"></i> Browser mode: Data stored in browser storage';
+            loadFromIndexedDB();
+        }
+    }
+
+    // Load data from IndexedDB (fallback)
+    function loadFromIndexedDB() {
+        loadStudentsFromDB().then(() => {
+            return loadImportedFromDB();
+        }).then(() => {
+            refreshStudentNameList();
+            refreshUI('');
+        });
+    }
+
+    // Save students to IndexedDB
+    function saveStudentsToDB() {
+        if (!db) return;
+        const tx = db.transaction(STUDENT_STORE, 'readwrite');
+        const store = tx.objectStore(STUDENT_STORE);
+        store.clear();
+        students.forEach(s => store.put(s));
+        
+        // Also save to file if in pywebview mode
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.save_students_to_file(students);
+        }
+    }
+
+    // Load students from IndexedDB
+    function loadStudentsFromDB() {
+        return new Promise((resolve) => {
+            if (!db) return resolve([]);
+            const tx = db.transaction(STUDENT_STORE, 'readonly');
+            const store = tx.objectStore(STUDENT_STORE);
+            const req = store.getAll();
+            req.onsuccess = () => { students = req.result || []; resolve(students); };
+            req.onerror = () => { students = []; resolve([]); };
+        });
+    }
+
+    // Save imported list to IndexedDB
+    function saveImportedToDB(list) {
+        if (!db) return;
+        const tx = db.transaction(IMPORT_STORE, 'readwrite');
+        const store = tx.objectStore(IMPORT_STORE);
+        store.clear();
+        list.forEach((item, idx) => { item.id = idx; store.put(item); });
+        
+        // Also save to file if in pywebview mode
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.save_imported_to_file(list);
+        }
+    }
+
+    // Load imported list from IndexedDB
+    function loadImportedFromDB() {
+        return new Promise((resolve) => {
+            if (!db) return resolve([]);
+            const tx = db.transaction(IMPORT_STORE, 'readonly');
+            const store = tx.objectStore(IMPORT_STORE);
+            const req = store.getAll();
+            req.onsuccess = () => { 
+                importedStudents = (req.result || []).map(({id, ...rest}) => rest); 
+                resolve(importedStudents);
+            };
+            req.onerror = () => { importedStudents = []; resolve([]); };
+        });
+    }
+
+    // Update folder display
+    function updateFolderDisplay() {
+        const display = document.getElementById('folderPathDisplay');
+        if (appSettings.pulseFolderPath) {
+            display.innerHTML = `<i class="fas fa-folder-open"></i> Data folder: ${appSettings.pulseFolderPath}`;
+            document.getElementById('saveFolderPath').textContent = appSettings.pulseFolderPath;
+        }
+    }
+
+    // Refresh student name datalist
+    function refreshStudentNameList() {
+        const list = document.getElementById('studentNameList');
+        list.innerHTML = '';
+        importedStudents.forEach(s => {
+            if (s.Name) {
+                const opt = document.createElement('option');
+                opt.value = s.Name;
+                list.appendChild(opt);
+            }
+        });
+    }
+
+    // Get next patient number
+    function getNextPatientNumber() {
+        let max = 0; 
+        students.forEach(s => { 
+            let n = parseInt(s.patientNumber?.substring(1)||'0',10); 
+            if (n>max) max=n;
+        });
+        return 'P' + String(max+1).padStart(3,'0');
+    }
+
+    // DOM elements
+    const listContainer = document.getElementById('student-list-container');
+    const totalSpan = document.getElementById('total-visits');
+    const ongoingSpan = document.getElementById('ongoing-count');
+    const addBtn = document.getElementById('addStudentBtn');
+    const searchInput = document.getElementById('searchInput');
+    const nameInp = document.getElementById('student-name');
+    const classInp = document.getElementById('student-class');
+    const streamInp = document.getElementById('student-stream');
+    const ageInp = document.getElementById('age');
+    const symptomsInp = document.getElementById('symptoms');
+    const drugListDiv = document.getElementById('drug-list');
+    const addDrugBtn = document.getElementById('addDrugBtn');
+    const lookupInput = document.getElementById('lookupStudentName');
+    const fillBtn = document.getElementById('fillFromLookupBtn');
+    
+    // Dialog elements
+    const saveDialog = document.getElementById('saveDialog');
+    const emailDialog = document.getElementById('emailDialog');
+    const saveFileName = document.getElementById('saveFileName');
+    const cancelSaveBtn = document.getElementById('cancelSaveBtn');
+    const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+    const adminEmail = document.getElementById('adminEmail');
+    const emailSubject = document.getElementById('emailSubject');
+    const emailMessage = document.getElementById('emailMessage');
+    const emailFileName = document.getElementById('emailFileName');
+    const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+    const confirmEmailBtn = document.getElementById('confirmEmailBtn');
+    
+    // Pending data for save/email
+    let pendingSaveData = null;
+
+    // Fill form from imported list
+    fillBtn.addEventListener('click', () => {
+        const searchName = lookupInput.value.trim().toLowerCase();
+        const match = importedStudents.find(s => s.Name?.toLowerCase() === searchName);
+        if (!match) { alert('Name not found in imported list'); return; }
+        nameInp.value = match.Name || '';
+        if (match.Class) { 
+            let optionExists = false;
+            for (let opt of classInp.options) { 
+                if (opt.value === match.Class) { 
+                    classInp.value = match.Class; 
+                    optionExists = true; 
+                    break; 
+                }
+            }
+            if (!optionExists) classInp.value = match.Class;
+        }
+        if (match.Stream) { 
+            let optExists = false;
+            for (let opt of streamInp.options) { 
+                if (opt.value === match.Stream) { 
+                    streamInp.value = match.Stream; 
+                    optExists = true; 
+                    break; 
+                }
+            }
+            if (!optExists) streamInp.value = match.Stream;
+        }
+        if (match.Age) ageInp.value = match.Age;
+        if (match.Gender) document.getElementById('gender').value = match.Gender;
+    });
+
+    // Drug row factory
+    function createDrugEntry(drug = { name: '', dosage: '', duration: 3, status: 'ongoing', timesPerDay: 2 }) {
+        const div = document.createElement('div'); 
+        div.className = 'drug-entry';
+        div.innerHTML = `
+            <input type="text" class="drug-name" placeholder="Drug" value="${drug.name}" list="drugSuggest">
+            <input type="text" class="drug-dosage" placeholder="Dosage" value="${drug.dosage}">
+            <input type="number" class="drug-duration" placeholder="Days" value="${drug.duration}" min="1" style="width:70px;">
+            <select class="drug-status" style="width:100px;">
+                <option value="ongoing" ${drug.status==='ongoing'?'selected':''}>Ongoing</option>
+                <option value="completed" ${drug.status==='completed'?'selected':''}>Completed</option>
+            </select>
+            <select class="drug-times" style="width:60px;" title="times/day">
+                <option value="1" ${drug.timesPerDay==1?'selected':''}>1x</option>
+                <option value="2" ${drug.timesPerDay==2?'selected':''}>2x</option>
+                <option value="3" ${drug.timesPerDay==3?'selected':''}>3x</option>
+            </select>
+            <button class="remove-drug"><i class="fas fa-times-circle"></i></button>
+        `;
+        div.querySelector('.remove-drug').addEventListener('click', function(e) { 
+            e.stopPropagation(); 
+            if (document.querySelectorAll('.drug-entry').length>1) {
+                div.remove(); 
+            } else {
+                alert('At least one drug required'); 
+            }
+        });
+        return div;
+    }
+
+    function resetDrugList() { 
+        drugListDiv.innerHTML = ''; 
+        drugListDiv.appendChild(createDrugEntry({ name:'Paracetamol', dosage:'2x 500mg', duration:3, status:'ongoing', timesPerDay:2 })); 
+    }
+    
+    resetDrugList();
+    addDrugBtn.addEventListener('click', ()=> drugListDiv.appendChild(createDrugEntry({ name:'', dosage:'', duration:3, timesPerDay:2 })));
+
+    function collectDrugsFromForm() {
+        let drugs = [];
+        document.querySelectorAll('.drug-entry').forEach(div => {
+            let name = div.querySelector('.drug-name')?.value.trim();
+            if (name) drugs.push({
+                name: name,
+                dosage: div.querySelector('.drug-dosage')?.value.trim()||'',
+                duration: parseInt(div.querySelector('.drug-duration')?.value)||1,
+                status: div.querySelector('.drug-status')?.value||'ongoing',
+                timesPerDay: parseInt(div.querySelector('.drug-times')?.value)||2
+            });
+        });
+        return drugs.length ? drugs : [{ name:'none', dosage:'', duration:1, status:'completed', timesPerDay:1 }];
+    }
+
+    let selectedStudentId = null;
+    
+    function refreshUI(filter = '') {
+        totalSpan.innerText = students.length;
+        let ongoing = students.reduce((acc,s)=> acc + (s.drugs ? s.drugs.filter(d=>d.status==='ongoing').length : 0), 0);
+        ongoingSpan.innerText = ongoing;
+
+        let today = new Date().toISOString().slice(0,10);
+        let totalDoses = 0, takenDoses = 0;
+        students.forEach(s => { 
+            if (s.adherence && s.adherence[today]) { 
+                Object.entries(s.adherence[today]).forEach(([dn, times]) => { 
+                    ['morning','afternoon','evening'].forEach(t => { 
+                        if (times[t]!==undefined) { 
+                            totalDoses++; 
+                            if (times[t]===true) takenDoses++; 
+                        } 
+                    }); 
+                }); 
+            } 
+        });
+        let pct = totalDoses ? Math.round(takenDoses/totalDoses*100) : 0;
+        document.getElementById('adherence-today').innerText = pct+'%';
+        document.getElementById('takenCounter').innerText = takenDoses;
+        document.getElementById('totalDosesCounter').innerText = totalDoses;
+
+        let filtered = students;
+        if (filter.trim()) filtered = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()) || s.patientNumber.includes(filter));
+
+        listContainer.innerHTML = '';
+        filtered.forEach(s => {
+            let li = document.createElement('li');
+            li.className = `student-item ${selectedStudentId === s.id ? 'selected' : ''}`;
+            li.setAttribute('data-id', s.id);
+            li.innerHTML = `<h4>${s.name} · ${s.patientNumber}</h4><small>${s.class} · ${s.symptoms.substring(0,20)}</small>`;
+            li.addEventListener('click', () => { 
+                selectedStudentId = s.id; 
+                refreshUI(searchInput.value); 
+                renderDetail(s.id); 
+            });
+            listContainer.appendChild(li);
+        });
+
+        if (selectedStudentId && students.find(s=>s.id===selectedStudentId)) {
+            renderDetail(selectedStudentId);
+        } else { 
+            document.getElementById('detailContent').style.display = 'none'; 
+            document.getElementById('emptyDetailMsg').style.display = 'block'; 
+        }
+
+        let nums = students.map(s=>parseInt(s.patientNumber.substring(1))).filter(n=>!isNaN(n));
+        if (nums.length) { 
+            let min = Math.min(...nums); 
+            let max = Math.max(...nums); 
+            document.getElementById('patientRange').innerText = `P${min}..P${max}`; 
+        }
+        
+        let missedToday = 0;
+        students.forEach(s => { 
+            if (s.adherence && s.adherence[today]) { 
+                Object.values(s.adherence[today]).forEach(t => { 
+                    if (t.morning===false) missedToday++;
+                    if (t.afternoon===false) missedToday++;
+                    if (t.evening===false) missedToday++;
+                }); 
+            } 
+        });
+        document.getElementById('followUpCount').innerText = missedToday;
+
+        updateChartsAndMissed();
+        saveStudentsToDB();
+    }
+
+    function renderDetail(id) {
+        let s = students.find(s=>s.id===id);
+        if (!s) return;
+        document.getElementById('emptyDetailMsg').style.display = 'none';
+        document.getElementById('detailContent').style.display = 'block';
+        document.getElementById('detailName').innerText = s.name;
+        document.getElementById('detailID').innerText = s.patientNumber;
+        document.getElementById('detailClass').innerText = s.class + ' · ' + s.stream;
+        document.getElementById('detailSymptoms').innerText = s.symptoms;
+        let drugStr = s.drugs.map(d=>`${d.name} (${d.dosage} ${d.timesPerDay}x/d)`).join(', ');
+        document.getElementById('detailDrugs').innerText = drugStr;
+
+        let today = new Date().toISOString().slice(0,10);
+        if (!s.adherence) s.adherence = {};
+        if (!s.adherence[today]) { 
+            s.adherence[today] = {}; 
+            s.drugs.forEach(d => { 
+                if (d.status==='ongoing') {
+                    s.adherence[today][d.name] = { morning: null, afternoon: null, evening: null }; 
+                }
+            }); 
+        }
+
+        let container = document.getElementById('doseTrackingContainer');
+        container.innerHTML = '';
+        s.drugs.filter(d=>d.status==='ongoing').forEach(drug => {
+            let times = drug.timesPerDay || 2;
+            let slots = ['morning','afternoon','evening'].slice(0, times);
+            let row = document.createElement('div'); 
+            row.className = 'dose-row';
+            row.innerHTML = `<span style="width:100px;">${drug.name}</span>`;
+            let iconDiv = document.createElement('div'); 
+            iconDiv.className = 'dose-icons';
+            let ad = s.adherence[today][drug.name] || { morning: null, afternoon: null, evening: null };
+            slots.forEach(slot => {
+                let icon = document.createElement('i');
+                icon.className = `fas ${ad[slot] === true ? 'fa-check-circle' : (ad[slot] === false ? 'fa-times-circle' : 'fa-circle')}`;
+                icon.setAttribute('data-drug', drug.name); 
+                icon.setAttribute('data-slot', slot);
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let curr = s.adherence[today][drug.name]?.[slot];
+                    let newVal = curr === true ? false : (curr === false ? null : true);
+                    if (!s.adherence[today][drug.name]) s.adherence[today][drug.name] = {};
+                    s.adherence[today][drug.name][slot] = newVal;
+                    renderDetail(id);
+                    refreshUI(searchInput.value);
+                });
+                iconDiv.appendChild(icon);
+            });
+            row.appendChild(iconDiv);
+            container.appendChild(row);
+        });
+    }
+
+    let diseaseChart, statusChart;
+    
+    function updateChartsAndMissed() {
+        let diseases = {}; 
+        students.forEach(s => { 
+            let sym = s.symptoms.split(',')[0].trim() || 'other'; 
+            diseases[sym] = (diseases[sym]||0)+1; 
+        });
+        
+        let ctx1 = document.getElementById('diseaseChart').getContext('2d');
+        if (diseaseChart) diseaseChart.destroy();
+        diseaseChart = new Chart(ctx1, { 
+            type:'doughnut', 
+            data: { 
+                labels: Object.keys(diseases), 
+                datasets: [{ 
+                    data: Object.values(diseases), 
+                    backgroundColor: ['#2e8b57','#cd5c5c','#4682b4','#daa520','#6a4e9a'] 
+                }] 
+            } 
+        });
+
+        let ongoingCnt = students.filter(s=> s.drugs.some(d=>d.status==='ongoing')).length;
+        let completedCnt = students.length - ongoingCnt;
+        let ctx2 = document.getElementById('statusChart').getContext('2d');
+        if (statusChart) statusChart.destroy();
+        statusChart = new Chart(ctx2, { 
+            type:'bar', 
+            data: { 
+                labels: ['Ongoing','Completed'], 
+                datasets: [{ 
+                    data: [ongoingCnt, completedCnt], 
+                    backgroundColor: '#1e6f9c' 
+                }] 
+            } 
+        });
+
+        let today = new Date().toISOString().slice(0,10);
+        let missedList = [];
+        students.forEach(s => {
+            if (s.adherence && s.adherence[today]) {
+                let missedCount = 0;
+                Object.entries(s.adherence[today]).forEach(([drug, times]) => {
+                    if (times.morning === false) missedCount++;
+                    if (times.afternoon === false) missedCount++;
+                    if (times.evening === false) missedCount++;
+                });
+                if (missedCount > 0) missedList.push({ name: s.name, patient: s.patientNumber, missed: missedCount });
+            }
+        });
+        
+        let container = document.getElementById('missedDosesContainer');
+        if (missedList.length === 0) {
+            container.innerHTML = '<p>✅ No missed doses today.</p>';
+        } else {
+            let html = '';
+            missedList.forEach(m => html += `<div class="missed-item"><span>${m.name} (${m.patient})</span><span style="color:#b34a00;">${m.missed} missed</span></div>`);
+            container.innerHTML = html;
+        }
+
+        let top = Object.keys(diseases).reduce((a,b)=> diseases[a] > diseases[b] ? a : b, '—');
+        document.getElementById('topDisease').innerText = top;
+        document.getElementById('activePatients').innerText = students.length;
+        
+        // Calculate weekly adherence (simplified)
+        let weeklyAdherence = calculateWeeklyAdherence();
+        document.getElementById('weeklyAdh').innerText = weeklyAdherence + '%';
+    }
+
+    function calculateWeeklyAdherence() {
+        // Simplified weekly adherence calculation
+        let totalPossible = 0;
+        let totalTaken = 0;
+        let today = new Date();
+        
+        for (let i = 0; i < 7; i++) {
+            let date = new Date(today);
+            date.setDate(date.getDate() - i);
+            let dateStr = date.toISOString().slice(0,10);
+            
+            students.forEach(s => {
+                if (s.adherence && s.adherence[dateStr]) {
+                    Object.values(s.adherence[dateStr]).forEach(times => {
+                        ['morning','afternoon','evening'].forEach(slot => {
+                            if (times[slot] !== undefined) {
+                                totalPossible++;
+                                if (times[slot] === true) totalTaken++;
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        return totalPossible > 0 ? Math.round((totalTaken / totalPossible) * 100) : 0;
+    }
+
+    // Add student
+    addBtn.addEventListener('click', () => {
+        let name = nameInp.value.trim(); 
+        if (!name) return alert('Enter name');
+        let drugs = collectDrugsFromForm();
+        let newStudent = {
+            id: 's'+Date.now()+Math.random().toString(36).substr(2,5),
+            patientNumber: getNextPatientNumber(),
+            name, 
+            class: classInp.value||'—', 
+            stream: streamInp.value,
+            age: parseInt(ageInp.value)||15, 
+            gender:'Male', 
+            symptoms: symptomsInp.value.trim()||'—',
+            drugs: drugs,
+            adherence: {},
+            date: new Date().toISOString().slice(0,10)
+        };
+        students.push(newStudent);
+        refreshUI(searchInput.value);
+        nameInp.value = ''; 
+        classInp.value = 'S.1'; 
+        streamInp.value='East'; 
+        ageInp.value='15'; 
+        symptomsInp.value='Fever';
+        resetDrugList();
+    });
+
+    // Search
+    searchInput.addEventListener('input', () => refreshUI(searchInput.value));
+
+    // Generate Excel data
+    function generateExcelData() {
+        let data = [['PatientID','Name','Class','Stream','Age','Symptoms','Drugs','Status','AdherenceSummary']];
+        students.forEach(s => {
+            let drugStr = s.drugs.map(d=>`${d.name} (${d.dosage} ${d.timesPerDay}x/d)`).join('; ');
+            let adSum = '';
+            if (s.adherence) {
+                Object.entries(s.adherence).forEach(([date, drugs]) => {
+                    adSum += date + ':';
+                    Object.entries(drugs).forEach(([dn, times]) => { 
+                        adSum += dn + ' M:'+times.morning+' A:'+times.afternoon+' E:'+times.evening+' '; 
+                    });
+                });
+            }
+            data.push([s.patientNumber, s.name, s.class, s.stream, s.age, s.symptoms, drugStr, s.drugs[0]?.status || '—', adSum]);
+        });
+        
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, 'SickbayReport');
+        return wb;
+    }
+
+    // Save to device functions
+    function showSaveDialog() {
+        const today = new Date().toISOString().slice(0,10);
+        saveFileName.value = `sickbay_report_${today}`;
+        saveDialog.style.display = 'flex';
+        pendingSaveData = generateExcelData();
+    }
+
+    function hideSaveDialog() {
+        saveDialog.style.display = 'none';
+        pendingSaveData = null;
+    }
+
+    function confirmSave() {
+        let filename = saveFileName.value.trim();
+        if (!filename) {
+            filename = `sickbay_report_${new Date().toISOString().slice(0,10)}`;
+        }
+        
+        if (!filename.toLowerCase().endsWith('.xlsx')) {
+            filename += '.xlsx';
+        }
+        
+        if (pendingSaveData) {
+            if (window.pywebview && window.pywebview.api) {
+                // Save to Pulse_Files folder
+                const wbdata = XLSX.write(pendingSaveData, { type: 'base64', bookType: 'xlsx' });
+                window.pywebview.api.save_report_to_folder(wbdata, filename)
+                    .then(result => {
+                        if (result.success) {
+                            alert('Report saved successfully to: ' + result.path);
+                        } else {
+                            alert('Error saving file: ' + result.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving:', error);
+                        XLSX.writeFile(pendingSaveData, filename);
+                    });
+            } else {
+                // Browser fallback
+                XLSX.writeFile(pendingSaveData, filename);
+            }
+        }
+        
+        hideSaveDialog();
+    }
+
+    // Email functions
+    function showEmailDialog() {
+        const today = new Date().toISOString().slice(0,10);
+        emailFileName.value = `sickbay_report_${today}`;
+        adminEmail.value = appSettings.adminEmail || 'admin@jicoschool.edu';
+        emailSubject.value = `Sickbay Report - ${today}`;
+        emailDialog.style.display = 'flex';
+        pendingSaveData = generateExcelData();
+    }
+
+    function hideEmailDialog() {
+        emailDialog.style.display = 'none';
+        pendingSaveData = null;
+    }
+
+    function confirmEmail() {
+        let email = adminEmail.value.trim();
+        if (!email) {
+            alert('Please enter an email address');
+            return;
+        }
+        
+        let subject = emailSubject.value.trim() || 'Sickbay Report';
+        let message = emailMessage.value.trim() || 'Please find attached the latest sickbay report.';
+        let filename = emailFileName.value.trim() || `sickbay_report_${new Date().toISOString().slice(0,10)}`;
+        
+        if (!filename.toLowerCase().endsWith('.xlsx')) {
+            filename += '.xlsx';
+        }
+        
+        if (pendingSaveData) {
+            if (window.pywebview && window.pywebview.api) {
+                // Use Python backend to send email
+                const wbdata = XLSX.write(pendingSaveData, { type: 'base64', bookType: 'xlsx' });
+                window.pywebview.api.send_report_email(email, subject, message, wbdata, filename)
+                    .then(result => {
+                        if (result.success) {
+                            alert('Email sent successfully to ' + email);
+                            appSettings.adminEmail = email; // Save for next time
+                        } else {
+                            alert('Error sending email: ' + result.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending email:', error);
+                        alert('Failed to send email. Please check your internet connection.');
+                    });
+            } else {
+                // Browser fallback - create mailto link
+                alert('Email functionality requires the desktop application.\nThe file will be saved locally instead.');
+                XLSX.writeFile(pendingSaveData, filename);
+            }
+        }
+        
+        hideEmailDialog();
+    }
+
+    // Event listeners for dialogs
+    document.getElementById('exportExcelBtn').addEventListener('click', () => {
+        if (students.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        showSaveDialog();
+    });
+
+    document.getElementById('emailReportBtn').addEventListener('click', () => {
+        if (students.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        showEmailDialog();
+    });
+
+    cancelSaveBtn.addEventListener('click', hideSaveDialog);
+    confirmSaveBtn.addEventListener('click', confirmSave);
+    cancelEmailBtn.addEventListener('click', hideEmailDialog);
+    confirmEmailBtn.addEventListener('click', confirmEmail);
+
+    // Close dialogs on overlay click
+    saveDialog.addEventListener('click', (e) => {
+        if (e.target === saveDialog) {
+            hideSaveDialog();
+        }
+    });
+    
+    emailDialog.addEventListener('click', (e) => {
+        if (e.target === emailDialog) {
+            hideEmailDialog();
+        }
+    });
+
+    // Handle Enter key in save dialog
+    saveFileName.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            confirmSave();
+        }
+    });
+
+    // Handle Enter key in email dialog
+    adminEmail.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            confirmEmail();
+        }
+    });
+
+    // Import student list
+    document.getElementById('importBtn').addEventListener('click', () => {
+        const file = document.getElementById('importFile').files[0];
+        if (!file) { alert('Select a file'); return; }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = e.target.result;
+            PapaParse.parse(data, { 
+                header: true, 
+                skipEmptyLines: true, 
+                complete: (results) => {
+                    const list = results.data.filter(row => row.Name && row.Name.trim() !== '');
+                    importedStudents = list;
+                    saveImportedToDB(importedStudents);
+                    refreshStudentNameList();
+                    document.getElementById('importStatus').innerText = `Imported ${list.length} students.`;
+                    
+                    // Save to file if in pywebview mode
+                    if (window.pywebview && window.pywebview.api) {
+                        window.pywebview.api.save_imported_to_file(list);
+                    }
+                }
+            });
+        };
+        
+        if (file.name.endsWith('.csv')) {
+            reader.readAsText(file);
+        } else {
+            const fr = new FileReader();
+            fr.onload = (e) => {
+                const wb = XLSX.read(e.target.result, { type: 'binary' });
+                const sheet = wb.SheetNames[0];
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet]);
+                importedStudents = rows.filter(r => r.Name);
+                saveImportedToDB(importedStudents);
+                refreshStudentNameList();
+                document.getElementById('importStatus').innerText = `Imported ${importedStudents.length} students.`;
+                
+                // Save to file if in pywebview mode
+                if (window.pywebview && window.pywebview.api) {
+                    window.pywebview.api.save_imported_to_file(importedStudents);
+                }
+            };
+            fr.readAsBinaryString(file);
+        }
+    });
+
+    // Tab switching
+    document.getElementById('tabMain').addEventListener('click', ()=>{
+        document.getElementById('tabMain').classList.add('active'); 
+        document.getElementById('tabStats').classList.remove('active');
+        document.getElementById('paneMain').classList.add('active'); 
+        document.getElementById('paneStats').classList.remove('active');
+    });
+    
+    document.getElementById('tabStats').addEventListener('click', ()=>{
+        document.getElementById('tabStats').classList.add('active'); 
+        document.getElementById('tabMain').classList.remove('active');
+        document.getElementById('paneStats').classList.add('active'); 
+        document.getElementById('paneMain').classList.remove('active');
+        setTimeout(updateChartsAndMissed, 30);
+    });
+
+    // Initialize the application
+    openDB().catch(e => {
+        console.warn('DB failed, using fallback (in-memory)');
+        refreshUI('');
+    });
+
+})();
+</script>
+
+<!-- Python backend bridge for pywebview -->
+<script>
+// This will be available when running in pywebview
+if (window.pywebview && window.pywebview.api) {
+    console.log('pywebview API detected - using native file system');
+} else {
+    console.log('Running in browser mode - using browser storage');
+    
+    // Add browser mode indicator
+    document.addEventListener('DOMContentLoaded', function() {
+        const folderDisplay = document.getElementById('folderPathDisplay');
+        if (folderDisplay) {
+            folderDisplay.innerHTML = '<i class="fas fa-info-circle"></i> Browser mode: Data stored in browser storage only';
+        }
+    });
+}
+</script>
+</body>
+</html>
