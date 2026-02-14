@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Pulse · JICO Sickbay · offline local DB</title>
+    <title>Pulse Professional · JICO Healthcare Management System</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts Inter -->
@@ -14,7 +14,11 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <!-- PapaParse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <style>
+        /* [Previous CSS styles remain exactly the same] */
         * {
             margin: 0;
             padding: 0;
@@ -22,180 +26,829 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
+        /* Professional Theme System */
+        :root {
+            --primary-900: #001b3a;
+            --primary-800: #002b5c;
+            --primary-700: #003c7a;
+            --primary-600: #004c97;
+            --primary-500: #1a5fa0;
+            --primary-400: #4a7fb0;
+            --primary-300: #7a9fc0;
+            
+            --accent-700: #1a4d2e;
+            --accent-600: #1f5e3a;
+            --accent-500: #2e8b57;
+            
+            --warning-700: #b34a00;
+            --danger-700: #c02f2f;
+            
+            --neutral-100: #f8fafc;
+            --neutral-200: #eef2f6;
+            --neutral-300: #e2e8f0;
+            --neutral-400: #cbd5e1;
+            --neutral-500: #94a3b8;
+            --neutral-600: #64748b;
+            --neutral-700: #475569;
+            --neutral-800: #334155;
+            --neutral-900: #1e293b;
+            
+            --bg-gradient: linear-gradient(155deg, #f0f5fa 0%, #e3ecf5 100%);
+            --card-bg: rgba(255,255,255,0.85);
+            --border-light: rgba(255,255,255,0.9);
+            --shadow-sm: 0 2px 4px rgba(0,20,40,0.02);
+            --shadow-md: 0 8px 22px -16px #102a4e;
+            --shadow-lg: 0 20px 40px -20px #102a4e;
+        }
+
         body {
-            background: linear-gradient(155deg, #e4ecf7 0%, #d0dfef 100%);
+            background: var(--bg-gradient);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 1rem;
+            color: var(--neutral-800);
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --bg-gradient: linear-gradient(155deg, #121b28 0%, #0a121f 100%);
+            --card-bg: rgba(30, 40, 55, 0.9);
+            --border-light: rgba(70, 90, 120, 0.3);
+            color: var(--neutral-200);
+        }
+
+        body.dark-theme .app-container {
+            background: var(--card-bg);
+            box-shadow: 0 30px 55px -25px #000, 0 0 0 1px rgba(100,150,200,0.1) inset;
         }
 
         .app-container {
-            width: 100%;
-            max-width: 1600px;
-            background: rgba(255,255,255,0.7);
+            max-width: 1800px;
+            margin: 0 auto;
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 2.5rem;
-            box-shadow: 0 30px 55px -25px #102a4e, 0 0 0 1px rgba(255,255,255,0.8) inset;
-            padding: 1.5rem 1.8rem 2rem;
-            transition: all 0.2s;
+            border-radius: 2rem;
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-light) inset;
+            padding: 1.5rem;
         }
 
-        @media (max-width: 720px) {
-            .app-container { padding: 1rem 1rem 1.5rem; border-radius: 2rem; }
-        }
-
-        .pulse-header {
+        /* Header Styles */
+        .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
-        .logo-area { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { background: #002b4e; width: 48px; height: 48px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; color: white; }
-        .logo-text h1 { font-size: 1.9rem; font-weight: 700; color: #0f2b45; line-height: 1.2; }
-        .logo-text .tag { background: #ffffffd0; padding: 0.2rem 1.2rem; border-radius: 40px; font-weight: 500; color: #1e4b77; font-size: 0.8rem; border: 1px solid white; }
 
-        .jico-badge { background: #ffffffcc; padding: 0.5rem 1.6rem; border-radius: 60px; font-weight: 600; color: #0f2e48; border: 1px solid white; }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-        .tab-bar {
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-700);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-800);
+            line-height: 1.2;
+        }
+
+        .logo-text .badge {
+            background: var(--neutral-200);
+            padding: 0.2rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-600);
+        }
+
+        body.dark-theme .logo-text h1 {
+            color: var(--neutral-100);
+        }
+
+        body.dark-theme .logo-text .badge {
+            background: var(--neutral-800);
+            color: var(--neutral-300);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--neutral-200);
+            border: none;
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neutral-700);
+            font-weight: 500;
+        }
+
+        body.dark-theme .theme-toggle {
+            background: var(--neutral-800);
+            color: var(--neutral-200);
+        }
+
+        .system-status {
+            background: var(--accent-600);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
-            margin: 1.2rem 0 1.8rem;
-            border-bottom: 2px solid rgba(255,255,255,0.5);
-            padding-bottom: 0.3rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--neutral-300);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
         }
-        .tab {
-            background: transparent; border: none; padding: 0.6rem 1.5rem; font-weight: 600; color: #1f4a77; border-radius: 40px 40px 0 0; cursor: pointer; font-size: 0.95rem;
+
+        .nav-tab {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            background: transparent;
+            color: var(--neutral-600);
+            font-weight: 600;
+            border-radius: 60px 60px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
-        .tab i { margin-right: 6px; }
-        .tab.active { background: rgba(255,255,255,0.85); color: #00315c; }
-        .tab-pane { display: none; animation: fade 0.25s; }
-        .tab-pane.active { display: block; }
-        @keyframes fade { 0% { opacity: 0.2; } 100% { opacity: 1; } }
 
-        .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
-        .stat-card { background: #ffffffee; border-radius: 40px; padding: 0.7rem 1.8rem; display: flex; align-items: center; gap: 14px; flex: 1 1 150px; border: 1px solid white; box-shadow: 0 8px 22px -16px #002b4e; }
-        .stat-icon { background: #e8f0fe; width: 44px; height: 44px; border-radius: 26px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1d4e7c; }
-        .stat-info h3 { font-size: 1.8rem; font-weight: 700; color: #052945; }
+        .nav-tab i {
+            margin-right: 8px;
+        }
 
-        .dashboard-grid {
+        .nav-tab:hover {
+            color: var(--primary-600);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--primary-700);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+
+        body.dark-theme .nav-tab {
+            color: var(--neutral-400);
+        }
+
+        body.dark-theme .nav-tab.active {
+            background: var(--neutral-800);
+            color: var(--neutral-100);
+        }
+
+        .nav-tab.active i {
+            color: var(--primary-500);
+        }
+
+        /* Tab Panes */
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 2.2fr;
-            gap: 1.8rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .stat-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-100);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-600);
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--neutral-900);
+        }
+
+        .stat-info p {
+            color: var(--neutral-600);
+            font-size: 0.9rem;
+        }
+
+        body.dark-theme .stat-info h3 {
+            color: var(--neutral-100);
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Registration Panel */
+        .panel {
+            background: white;
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        body.dark-theme .panel {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            color: var(--neutral-800);
             margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        @media (max-width: 880px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
+        .site-footer {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #eaeaea;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.footer-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.footer-title span {
+  color: #4fd1c5;
+}
+
+.footer-credits {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.footer-credits span {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .footer-title {
+    font-size: 1rem;
+  }
+
+  .footer-credits {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+        .panel-title i {
+            color: var(--primary-600);
         }
 
-        .register-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2.2rem; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.8); }
-        .section-title { font-size: 1.3rem; color: #11355e; margin-bottom: 1.2rem; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .student-lookup { background: #eef5ff; border-radius: 60px; padding: 0.2rem 0.2rem 0.2rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem; margin-left: auto; border: 1px solid white; }
-        .student-lookup input { border: none; background: transparent; padding: 0.4rem; width: 130px; outline: none; font-size: 0.9rem; }
-        .student-lookup button { background: #00315c; border: none; color: white; border-radius: 40px; padding: 0.4rem 1rem; font-weight: 500; cursor: pointer; }
-        .input-group { margin-bottom: 1rem; }
-        .input-group label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #1f4465; }
-        .input-field { width: 100%; background: rgba(255,255,255,0.9); border: 1.5px solid #dae2ed; border-radius: 30px; padding: 0.75rem 1.3rem; font-size: 0.9rem; outline: none; }
-        .input-field:focus { border-color: #0077be; box-shadow: 0 0 0 3px #0077be30; }
-        .inline-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-
-        .drugs-section { background: rgba(255,255,255,0.5); border-radius: 26px; padding: 1rem 0.8rem; margin: 0.8rem 0; border: 1px solid #d0dff0; }
-        .drug-entry { display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; background: white; border-radius: 60px; padding: 0.5rem 1rem; margin-bottom: 0.7rem; }
-        .drug-entry input, .drug-entry select { background: white; border: 1px solid #c7d8ec; border-radius: 40px; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
-        .drug-name { flex: 2; min-width: 120px; } .drug-dosage { flex: 1; min-width: 80px; } .drug-duration { width: 70px; } .drug-times { width: 60px; } .remove-drug { background: none; border: none; color: #b00; font-size: 1.3rem; }
-        .btn-add-drug { background: rgba(255,255,255,0.8); border: 1px dashed #3670b3; border-radius: 50px; padding: 0.4rem 1.2rem; font-weight: 500; color: #175d9e; cursor: pointer; }
-        .btn-primary { background: #00315c; color: white; border: none; border-radius: 60px; padding: 0.9rem; font-weight: 600; width: 100%; cursor: pointer; margin-top: 1rem; box-shadow: 0 6px 16px #00315c60; }
-
-        .right-col { display: flex; flex-direction: column; gap: 1.5rem; }
-        .records-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2rem; border: 1px solid white; display: flex; flex-direction: column; max-height: 360px; overflow: hidden; }
-        .panel-header { padding: 1rem 1.5rem; border-bottom: 1px solid #eef3f9; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-        .search-box { background: rgba(255,255,255,0.8); border-radius: 50px; padding: 0.2rem 1rem; display: flex; align-items: center; gap: 6px; }
-        .search-box input { border: none; background: transparent; padding: 0.5rem 0; width: 150px; outline: none; }
-        .student-list { list-style: none; overflow-y: auto; padding: 0.5rem 1rem 0.5rem 1.5rem; flex: 1; }
-        .student-item { background: rgba(255,255,255,0.7); border-radius: 30px; margin-bottom: 0.5rem; padding: 0.8rem 1.2rem; border: 1px solid white; cursor: pointer; transition: 0.1s; }
-        .student-item:hover { background: white; transform: translateX(4px); }
-        .student-item.selected { background: #ffffff; border-left: 6px solid #004c97; }
-
-        .detail-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.4rem; border: 1px solid white; }
-        .dose-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 10px 0; }
-        .dose-icons i { font-size: 1.8rem; margin-right: 8px; cursor: pointer; color: #2d6390; }
-        .dose-icons i.fa-check-circle { color: #2fc48d; } .dose-icons i.fa-times-circle { color: #c02f2f; } .dose-icons i.fa-circle { color: #b3c9e0; }
-
-        .stats-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border-radius: 2.2rem; padding: 1.8rem; border: 1px solid white; margin-top: 1rem; }
-        .import-section { background: rgba(255,255,255,0.5); border-radius: 2rem; padding: 1.2rem; margin-bottom: 2rem; border: 1px solid white; }
-        .import-btn { background: #2e5a8b; color: white; border: none; border-radius: 60px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer; }
-        .charts-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
-        .chart-box { flex: 1 1 280px; background: rgba(255,255,255,0.7); border-radius: 1.8rem; padding: 1.2rem; height: 250px; }
-        .missed-list { background: #ffffffc0; border-radius: 2rem; padding: 1.2rem; margin: 1.5rem 0; }
-        .missed-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #cddef5; }
-        .btn-excel { background: #1f5e3a; color: white; border: none; border-radius: 60px; padding: 0.8rem 2rem; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px #1f5e3a70; }
-        .btn-email { background: #004c97; color: white; border: none; border-radius: 60px; padding: 0.8rem 2rem; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px #004c9770; }
-
-        .footer-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; background: #ffffffb0; border-radius: 60px; padding: 0.7rem 2rem; border: 1px solid white; }
-        @media (max-width: 600px) {
-            .footer-stats { flex-direction: column; gap: 0.5rem; }
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
-        
-        /* Save and Email Dialogs */
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--neutral-600);
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid var(--neutral-200);
+            border-radius: 60px;
+            font-size: 0.9rem;
+            background: var(--neutral-100);
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(0, 76, 151, 0.1);
+        }
+
+        textarea.form-control {
+            border-radius: 1.2rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        body.dark-theme .form-control {
+            background: var(--neutral-900);
+            border-color: var(--neutral-700);
+            color: var(--neutral-200);
+        }
+
+        /* Student Lookup */
+        .student-lookup {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .student-lookup input {
+            flex: 1;
+        }
+
+        .btn-lookup {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Drug Entry */
+        .drug-entry {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: var(--neutral-100);
+            padding: 0.8rem;
+            border-radius: 60px;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        body.dark-theme .drug-entry {
+            background: var(--neutral-900);
+        }
+
+        .drug-name {
+            flex: 2;
+            min-width: 120px;
+        }
+
+        .drug-dosage {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .drug-duration {
+            width: 70px;
+        }
+
+        .drug-times {
+            width: 60px;
+        }
+
+        .btn-remove-drug {
+            background: none;
+            border: none;
+            color: var(--danger-700);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .btn-add-drug {
+            background: var(--neutral-200);
+            border: 1px dashed var(--primary-400);
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            color: var(--primary-600);
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--primary-600);
+        }
+
+        /* Referral Section */
+        .referral-section {
+            background: var(--neutral-100);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        body.dark-theme .referral-section {
+            background: var(--neutral-900);
+        }
+
+        .referral-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .referral-details {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .referral-details.active {
+            display: block;
+        }
+
+        /* Patient List */
+        .patient-list-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .patient-item {
+            background: var(--neutral-100);
+            border-radius: 1.5rem;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--neutral-200);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-theme .patient-item {
+            background: var(--neutral-900);
+            border-color: var(--neutral-700);
+        }
+
+        .patient-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-400);
+        }
+
+        .patient-item.selected {
+            background: white;
+            border-left: 4px solid var(--primary-600);
+        }
+
+        body.dark-theme .patient-item.selected {
+            background: var(--neutral-800);
+        }
+
+        .patient-status {
+            padding: 0.3rem 1rem;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(255, 193, 7, 0.2);
+            color: #b38f00;
+        }
+
+        .status-completed {
+            background: rgba(46, 139, 87, 0.2);
+            color: var(--accent-600);
+        }
+
+        /* Dose Tracking */
+        .dose-tracking {
+            margin-top: 1rem;
+        }
+
+        .dose-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: var(--neutral-100);
+            border-radius: 60px;
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-theme .dose-row {
+            background: var(--neutral-900);
+        }
+
+        .dose-icons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dose-icons i {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dose-icons i.fa-check-circle {
+            color: var(--accent-500);
+        }
+
+        .dose-icons i.fa-times-circle {
+            color: var(--danger-700);
+        }
+
+        .dose-icons i.fa-circle {
+            color: var(--neutral-400);
+        }
+
+        .dose-icons i:hover {
+            transform: scale(1.1);
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 1px solid var(--neutral-200);
+            height: 300px;
+        }
+
+        body.dark-theme .chart-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .chart-card h4 {
+            margin-bottom: 1rem;
+            color: var(--neutral-700);
+            font-size: 1rem;
+        }
+
+        /* Inventory Grid */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .inventory-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .inventory-card {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .stock-level {
+            width: 100px;
+            height: 6px;
+            background: var(--neutral-300);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stock-fill {
+            height: 100%;
+            background: var(--accent-500);
+            border-radius: 3px;
+        }
+
+        .stock-fill.low {
+            background: var(--warning-700);
+        }
+
+        .stock-fill.critical {
+            background: var(--danger-700);
+        }
+
+        /* Database Visualizer */
+        .database-viewer {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .database-viewer {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        body.dark-theme th {
+            background: var(--neutral-900);
+            color: var(--neutral-300);
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        /* Footer Stats */
+        .footer-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: 60px;
+            border: 1px solid var(--neutral-200);
+        }
+
+        body.dark-theme .footer-stats {
+            background: var(--neutral-800);
+            border-color: var(--neutral-700);
+        }
+
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--neutral-700);
+        }
+
+        .footer-stat i {
+            color: var(--primary-500);
+        }
+
+        .footer-stat strong {
+            color: var(--neutral-900);
+            margin-left: 5px;
+        }
+
+        body.dark-theme .footer-stat strong {
+            color: var(--neutral-100);
+        }
+
+        /* Dialogs */
         .dialog-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.3);
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
-        
+
         .dialog {
             background: white;
             border-radius: 2rem;
             padding: 2rem;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 30px 60px rgba(0,20,40,0.3);
-            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
         }
-        
+
+        body.dark-theme .dialog {
+            background: var(--neutral-800);
+        }
+
         .dialog h3 {
-            color: #00315c;
             margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--primary-700);
         }
-        
-        .dialog input, .dialog textarea {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #dae2ed;
-            border-radius: 60px;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-        }
-        
-        .dialog textarea {
-            border-radius: 30px;
-            min-height: 100px;
-            resize: vertical;
-        }
-        
+
         .dialog-buttons {
             display: flex;
             gap: 1rem;
             justify-content: flex-end;
+            margin-top: 1.5rem;
         }
-        
+
         .dialog-btn {
             padding: 0.8rem 2rem;
             border-radius: 60px;
@@ -203,1050 +856,2169 @@
             font-weight: 600;
             cursor: pointer;
         }
-        
+
         .dialog-btn.cancel {
-            background: #eef3f9;
-            color: #2d6390;
+            background: var(--neutral-200);
+            color: var(--neutral-700);
         }
-        
+
         .dialog-btn.save {
-            background: #1f5e3a;
+            background: var(--primary-600);
             color: white;
         }
-        
-        .dialog-btn.email {
-            background: #004c97;
+
+        .btn-excel {
+            background: var(--accent-600);
             color: white;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 0.3rem 1rem;
+            border: none;
             border-radius: 60px;
-            font-size: 0.8rem;
+            padding: 0.8rem 1.5rem;
             font-weight: 600;
-            margin-left: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        
-        .status-success {
-            background: #2fc48d20;
-            color: #1f5e3a;
-            border: 1px solid #2fc48d;
-        }
-        
-        .status-info {
-            background: #004c9720;
-            color: #004c97;
-            border: 1px solid #004c97;
-        }
-        
-        .folder-path {
-            background: #eef3f9;
-            padding: 0.5rem 1rem;
+
+        .btn-email {
+            background: var(--primary-600);
+            color: white;
+            border: none;
             border-radius: 60px;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            word-break: break-all;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
         }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="pulse-header">
-        <div class="logo-area">
-            <div class="logo-icon"><i class="fas fa-heart-pulse"></i></div>
-            <div class="logo-text"><h1>Pulse</h1><span class="tag"><i class="far fa-clock"></i> JICO sickbay · offline local DB</span></div>
-        </div>
-        <div class="jico-badge">
-            <i class="fas fa-folder"></i> 
-            <span id="dataFolderStatus">Pulse_Files</span>
-        </div>
-    </div>
-
-    <div class="tab-bar">
-        <button class="tab active" id="tabMain"><i class="fas fa-clinic-medical"></i> Sickbay</button>
-        <button class="tab" id="tabStats"><i class="fas fa-chart-pie"></i> Statistics & exports</button>
-    </div>
-
-    <!-- main pane -->
-    <div id="paneMain" class="tab-pane active">
-        <div class="stats-row">
-            <div class="stat-card"><div class="stat-icon"><i class="fas-regular fa-notes-medical"></i></div><div class="stat-info"><h3 id="total-visits">0</h3><p>Visits</p></div></div>
-            <div class="stat-card"><div class="stat-icon"><i class="fas fa-pills"></i></div><div class="stat-info"><h3 id="ongoing-count">0</h3><p>ongoing meds</p></div></div>
-            <div class="stat-card"><div class="stat-icon"><i class="fas fa-list-check"></i></div><div class="stat-info"><h3 id="adherence-today">0%</h3><p>today adherence</p></div></div>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heart-pulse"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Pulse Professional</h1>
+                    <span class="badge">JICO Healthcare Management System v2.0</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-sun"></i>
+                    <span>Theme</span>
+                </button>
+                <div class="system-status">
+                    <i class="fas fa-database"></i> Live Database
+                </div>
+            </div>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- left register with student lookup -->
-            <div class="register-panel">
-                <div class="section-title">
-                    <i class="fas fa-user-plus"></i> Register sick student
-                    <div class="student-lookup">
-                        <i class="fas fa-search" style="color:#2d6390;"></i>
-                        <input type="text" id="lookupStudentName" placeholder="search imported student" list="studentNameList">
-                        <button id="fillFromLookupBtn"><i class="fas fa-file-import"></i> Fill</button>
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="dashboard">
+                <i class="fas fa-clinic-medical"></i> Dashboard
+            </button>
+            <button class="nav-tab" data-tab="patients">
+                <i class="fas fa-users"></i> Patients
+            </button>
+            <button class="nav-tab" data-tab="database">
+                <i class="fas fa-database"></i> Database
+            </button>
+            <button class="nav-tab" data-tab="statistics">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="nav-tab" data-tab="inventory">
+                <i class="fas fa-pills"></i> Pharmacy
+            </button>
+            <button class="nav-tab" data-tab="reports">
+                <i class="fas fa-file-alt"></i> Reports
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-pane active">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e6f0ff;">
+                        <i class="fas fa-users" style="color: #004c97;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPatients">0</h3>
+                        <p>Total Patients</p>
                     </div>
                 </div>
-                <datalist id="studentNameList"></datalist>
-                
-                <div class="input-group"><label>Full name</label><input type="text" class="input-field" id="student-name" placeholder="name" value="James Okoro"></div>
-                <div class="inline-2col">
-                    <div class="input-group"><label>Class</label>
-                        <select class="input-field" id="student-class">
-                            <option>S.1</option><option>S.2</option><option>S.3</option><option>S.4</option><option>S.5</option><option>S.6</option>
-                        </select>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e6ffe6;">
+                        <i class="fas fa-heart-circle-check" style="color: #1f5e3a;"></i>
                     </div>
-                    <div class="input-group"><label>Stream</label>
-                        <select class="input-field" id="student-stream">
-                            <option>East</option><option>West</option><option>North</option><option>South</option><option>Central</option>
-                            <option>Arts</option><option>Sciences</option><option>Biological</option><option>Physical</option>
-                        </select>
+                    <div class="stat-info">
+                        <h3 id="activePatients">0</h3>
+                        <p>Active Cases</p>
                     </div>
                 </div>
-                <div class="inline-2col">
-                    <div class="input-group"><label>Age</label><input type="number" class="input-field" id="age" value="15"></div>
-                    <div class="input-group"><label>Gender</label><input type="text" class="input-field" id="gender" value="Male" disabled></div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3e6;">
+                        <i class="fas fa-clock" style="color: #b34a00;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="todayVisits">0</h3>
+                        <p>Today's Visits</p>
+                    </div>
                 </div>
-                <div class="input-group"><label>Symptoms</label><input type="text" class="input-field" id="symptoms" value="Fever, cough"></div>
-                <div class="drugs-section">
-                    <div style="margin-bottom:6px;"><i class="fas fa-prescription"></i> Prescriptions</div>
-                    <div id="drug-list"></div>
-                    <button class="btn-add-drug" type="button" id="addDrugBtn"><i class="fas fa-plus-circle"></i> Add drug</button>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f0e6ff;">
+                        <i class="fas fa-pills" style="color: #6a4e9a;"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="lowStock">0</h3>
+                        <p>Low Stock Items</p>
+                    </div>
                 </div>
-                <button class="btn-primary" id="addStudentBtn"><i class="fas fa-floppy-disk"></i> Register (auto ID)</button>
             </div>
 
-            <!-- right column -->
-            <div class="right-col">
-                <div class="records-panel">
-                    <div class="panel-header">
-                        <h5><i class="fas fa-folder-open"></i> Student visits · click for details</h5>
-                        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="search..." id="searchInput"></div>
+            <!-- Main Dashboard -->
+            <div class="dashboard-layout">
+                <!-- Registration Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-user-plus"></i>
+                        <span>New Patient Registration</span>
                     </div>
-                    <ul class="student-list" id="student-list-container"></ul>
+
+                    <!-- Student Lookup -->
+                    <div class="student-lookup">
+                        <input type="text" class="form-control" id="studentSearch" placeholder="Search student database..." list="studentList">
+                        <datalist id="studentList"></datalist>
+                        <button class="btn-lookup" id="lookupStudentBtn"><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" class="form-control" id="patientName" placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Class</label>
+                            <select class="form-control" id="patientClass">
+                                <option value="S.1">S.1</option>
+                                <option value="S.2">S.2</option>
+                                <option value="S.3">S.3</option>
+                                <option value="S.4">S.4</option>
+                                <option value="S.5">S.5</option>
+                                <option value="S.6">S.6</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Stream</label>
+                            <select class="form-control" id="patientStream">
+                                <option value="East">East</option>
+                                <option value="West">West</option>
+                                <option value="North">North</option>
+                                <option value="South">South</option>
+                                <option value="Science">Science</option>
+                                <option value="Arts">Arts</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" class="form-control" id="patientAge" min="1" max="100">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select class="form-control" id="patientGender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact</label>
+                            <input type="text" class="form-control" id="patientContact" placeholder="Phone/Email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Symptoms / Diagnosis</label>
+                        <input type="text" class="form-control" id="patientSymptoms" placeholder="e.g., Fever, headache">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Notes</label>
+                        <textarea class="form-control" id="patientNotes" rows="2" placeholder="Any additional information..."></textarea>
+                    </div>
+
+                    <!-- Medications -->
+                    <div class="form-group">
+                        <label>Prescribed Medications</label>
+                        <div id="medicationsList"></div>
+                        <button class="btn-add-drug" id="addMedicationBtn">
+                            <i class="fas fa-plus"></i> Add Medication
+                        </button>
+                    </div>
+
+                    <!-- Referral -->
+                    <div class="referral-section">
+                        <label class="referral-toggle">
+                            <input type="checkbox" id="hasReferral">
+                            <span><i class="fas fa-share"></i> Add Referral</span>
+                        </label>
+                        <div class="referral-details" id="referralDetails">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Referred To</label>
+                                    <input type="text" class="form-control" id="referralTo" placeholder="Hospital/Clinic">
+                                </div>
+                                <div class="form-group">
+                                    <label>Time</label>
+                                    <input type="time" class="form-control" id="referralTime">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Reason</label>
+                                <input type="text" class="form-control" id="referralReason" placeholder="Reason for referral">
+                            </div>
+                            <div class="form-group">
+                                <label>Follow-up Date</label>
+                                <input type="date" class="form-control" id="followupDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="registerPatientBtn">
+                        <i class="fas fa-save"></i> Register Patient
+                    </button>
                 </div>
-                <div class="detail-panel" id="patientDetailPanel">
-                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:0.8rem;">
-                        <i class="fas fa-id-card fa-2x" style="color:#004c97;"></i>
-                        <span><strong id="detailName">Select a patient</strong> <span id="detailID" class="patient-tag" style="background:#dbeafe; padding:2px 10px; border-radius:40px;"></span></span>
+
+                <!-- Patient List Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-list"></i>
+                        <span>Active Patients</span>
                     </div>
-                    <div id="emptyDetailMsg">👈 click on any student to track doses</div>
-                    <div id="detailContent" style="display: none;">
-                        <p><span id="detailClass"></span> · <span id="detailSymptoms"></span></p>
-                        <div><i class="fas fa-prescription-bottle"></i> <span id="detailDrugs"></span></div>
-                        <div class="dose-timetable" style="margin-top:1rem;">
-                            <h5><i class="fas fa-clock"></i> Today's doses (click to toggle)</h5>
-                            <div id="doseTrackingContainer"></div>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="patientSearch" placeholder="Search patients...">
+                    </div>
+
+                    <div class="patient-list-container" id="patientList">
+                        <!-- Patient items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Detail Panel -->
+            <div class="panel" style="margin-top: 1.5rem;" id="patientDetailPanel">
+                <div class="panel-title">
+                    <i class="fas fa-user"></i>
+                    <span id="detailPatientName">Select a patient to view details</span>
+                    <button class="btn-excel" id="markCompletedBtn" style="display: none; margin-left: auto;">
+                        <i class="fas fa-check"></i> Mark Completed
+                    </button>
+                </div>
+                <div id="emptyDetailMessage" style="text-align: center; padding: 2rem; color: var(--neutral-500);">
+                    <i class="fas fa-arrow-left" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Select a patient from the list to view their details and track doses</p>
+                </div>
+                <div id="patientDetailContent" style="display: none;">
+                    <div class="form-grid" style="margin-bottom: 1rem;">
+                        <div>
+                            <p><strong>Patient ID:</strong> <span id="detailPatientId"></span></p>
+                            <p><strong>Class/Stream:</strong> <span id="detailClass"></span></p>
+                            <p><strong>Age/Gender:</strong> <span id="detailAgeGender"></span></p>
+                        </div>
+                        <div>
+                            <p><strong>Contact:</strong> <span id="detailContact"></span></p>
+                            <p><strong>Symptoms:</strong> <span id="detailSymptoms"></span></p>
+                            <p><strong>Registered:</strong> <span id="detailDate"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="panel" style="background: var(--neutral-100);">
+                        <h5><i class="fas fa-prescription"></i> Medications</h5>
+                        <div id="detailMedications"></div>
+                    </div>
+
+                    <div id="detailReferral" style="display: none; margin: 1rem 0; padding: 1rem; background: #fff3cd; border-radius: 1rem;">
+                        <i class="fas fa-share"></i> <span id="referralText"></span>
+                    </div>
+
+                    <div class="dose-tracking">
+                        <h5><i class="fas fa-clock"></i> Today's Dose Tracking</h5>
+                        <div id="doseTracking"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Tab -->
+        <div id="patients-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-users"></i>
+                    <span>Complete Patient Registry</span>
+                </div>
+                
+                <div class="action-bar">
+                    <button class="btn-excel" id="exportPatientsBtn">
+                        <i class="fas fa-file-excel"></i> Export Patient List
+                    </button>
+                    <button class="btn-email" id="importStudentsBtn">
+                        <i class="fas fa-upload"></i> Import Student Database
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Symptoms</th>
+                                <th>Status</th>
+                                <th>Visit Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Tab -->
+        <div id="database-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-database"></i>
+                    <span>Visual Database Explorer</span>
+                </div>
+
+                <!-- Database Stats -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbTotalRecords">0</h3>
+                            <p>Total Records</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbStorageSize">0 KB</h3>
+                            <p>Storage Used</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="dbLastBackup">Never</h3>
+                            <p>Last Backup</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Browser -->
+                <div style="margin-bottom: 1rem;">
+                    <select class="form-control" id="dbTableView" style="width: 200px;">
+                        <option value="patients">Patients</option>
+                        <option value="medications">Medications</option>
+                        <option value="referrals">Referrals</option>
+                        <option value="inventory">Inventory</option>
+                        <option value="dispensing">Dispensing Log</option>
+                    </select>
+                </div>
+
+                <div class="table-container" id="databaseTableContainer">
+                    <!-- Table will be inserted here -->
+                </div>
+
+                <div class="action-bar" style="margin-top: 2rem;">
+                    <button class="btn-excel" id="backupDatabaseBtn">
+                        <i class="fas fa-download"></i> Backup Database
+                    </button>
+                    <button class="btn-email" id="restoreDatabaseBtn">
+                        <i class="fas fa-upload"></i> Restore Database
+                    </button>
+                    <button class="btn-primary" id="optimizeDatabaseBtn">
+                        <i class="fas fa-broom"></i> Optimize
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Healthcare Analytics</span>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4>Common Conditions</h4>
+                        <canvas id="conditionsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Patient Status</h4>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Monthly Trends</h4>
+                        <canvas id="monthlyTrendsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Class Distribution</h4>
+                        <canvas id="classDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Analytics Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="avgRecoveryTime">0</h3>
+                            <p>Avg Recovery (days)</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="peakHour">00:00</h3>
+                            <p>Peak Visit Time</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="commonCondition">-</h3>
+                            <p>Most Common</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="referralRate">0%</h3>
+                            <p>Referral Rate</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- statistics pane with import -->
-    <div id="paneStats" class="tab-pane">
-        <div class="stats-panel">
-            <div class="import-section">
-                <h4><i class="fas fa-upload"></i> Import student list (Excel/CSV)</h4>
-                <p style="font-size:0.9rem; margin:0.5rem 0;">Expected columns: Name, Class, Stream, Age, Gender (optional)</p>
-                <input type="file" id="importFile" accept=".csv, .xlsx, .xls, .ods">
-                <button class="import-btn" id="importBtn"><i class="fas fa-file-import"></i> Import & store locally</button>
-                <span id="importStatus" style="margin-left:1rem;"></span>
-            </div>
-            
-            <!-- Data folder info -->
-            <div class="folder-path" id="folderPathDisplay">
-                <i class="fas fa-folder-open"></i> Loading folder information...
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0;">
-                <h3><i class="fas fa-chart-line"></i> Live statistics & missed doses</h3>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button class="btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Save to device</button>
-                    <button class="btn-email" id="emailReportBtn"><i class="fas fa-envelope"></i> Email report</button>
+        <!-- Inventory Tab -->
+        <div id="inventory-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-pills"></i>
+                    <span>Pharmacy Inventory Management</span>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn-primary" id="addStockBtn">
+                        <i class="fas fa-plus"></i> Add Stock
+                    </button>
+                    <button class="btn-excel" id="exportInventoryBtn">
+                        <i class="fas fa-file-excel"></i> Export Inventory
+                    </button>
+                </div>
+
+                <!-- Inventory Grid -->
+                <div class="inventory-grid" id="inventoryGrid">
+                    <!-- Inventory items will be inserted here -->
+                </div>
+
+                <!-- Dispensing Log -->
+                <div class="panel" style="margin-top: 2rem;">
+                    <h5><i class="fas fa-history"></i> Recent Dispensing Log</h5>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Medication</th>
+                                    <th>Quantity</th>
+                                    <th>Patient</th>
+                                    <th>Nurse</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dispensingLogBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            <div class="charts-row">
-                <div class="chart-box"><canvas id="diseaseChart"></canvas></div>
-                <div class="chart-box"><canvas id="statusChart"></canvas></div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-pane">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports & Exports</span>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn-excel" id="generateFullReport">
+                        <i class="fas fa-file-excel"></i> Complete Report
+                    </button>
+                    <button class="btn-email" id="emailReportBtn">
+                        <i class="fas fa-envelope"></i> Email Report
+                    </button>
+                    <button class="btn-primary" id="generateMonthlyReport">
+                        <i class="fas fa-calendar"></i> Monthly Summary
+                    </button>
+                </div>
+
+                <!-- Report Preview -->
+                <div class="stats-grid" style="margin: 2rem 0;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportTotalPatients">0</h3>
+                            <p>Total Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportThisMonth">0</h3>
+                            <p>This Month</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportRecovered">0</h3>
+                            <p>Recovered</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="reportActive">0</h3>
+                            <p>Active</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4>Monthly Comparison</h4>
+                        <canvas id="monthlyComparisonChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Recovery Rate</h4>
+                        <canvas id="recoveryRateChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="missed-list">
-                <h4><i class="fas fa-exclamation-triangle" style="color:#b34a00;"></i> Students who missed doses (today)</h4>
-                <div id="missedDosesContainer">Loading...</div>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="footer-stats">
+            <div class="footer-stat">
+                <i class="fas fa-database"></i>
+                <span>Records: <strong id="footerRecords">0</strong></span>
             </div>
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem;">
-                <div class="stat-card"><span>Most frequent disease: <strong id="topDisease">—</strong></span></div>
-                <div class="stat-card"><span>7‑day adherence: <strong id="weeklyAdh">0%</strong></span></div>
-                <div class="stat-card"><span>Active patients: <strong id="activePatients">0</strong></span></div>
+            <div class="footer-stat">
+                <i class="fas fa-check-circle" style="color: #2e8b57;"></i>
+                <span>Today's Doses: <strong id="footerDoses">0</strong></span>
+            </div>
+            <div class="footer-stat">
+                <i class="fas fa-exclamation-triangle" style="color: #b34a00;"></i>
+                <span>Missed: <strong id="footerMissed">0</strong></span>
+            </div>
+            <div class="footer-stat">
+                <i class="fas fa-clock"></i>
+                <span>Last Updated: <strong id="footerTime">Just now</strong></span>
             </div>
         </div>
     </div>
 
-    <!-- footer -->
-    <div class="footer-stats">
-        <span><i class="fas fa-flag"></i> follow‑up: <span id="followUpCount">0</span> missed doses</span>
-        <span><i class="fas fa-hashtag"></i> patient numbers: <span id="patientRange">P001...</span></span>
-        <span><i class="fas fa-check-circle" style="color:#2fc48d;"></i> today taken: <span id="takenCounter">0</span>/<span id="totalDosesCounter">0</span></span>
-    </div>
-</div>
-
-<!-- Save Dialog -->
-<div class="dialog-overlay" id="saveDialog">
-    <div class="dialog">
-        <h3><i class="fas fa-save"></i> Save Report to Device</h3>
-        <input type="text" id="saveFileName" placeholder="Enter filename (e.g., sickbay_report)" value="sickbay_report">
-        <div class="folder-path">
-            <i class="fas fa-folder"></i> Will be saved in: <span id="saveFolderPath">Pulse_Folder</span>
-        </div>
-        <div class="dialog-buttons">
-            <button class="dialog-btn cancel" id="cancelSaveBtn">Cancel</button>
-            <button class="dialog-btn save" id="confirmSaveBtn">Save</button>
+    <!-- Stock Dialog -->
+    <div class="dialog-overlay" id="stockDialog">
+        <div class="dialog">
+            <h3><i class="fas fa-pills"></i> Add/Update Stock</h3>
+            <input type="text" class="form-control" id="stockName" placeholder="Medication name">
+            <input type="number" class="form-control" id="stockQuantity" placeholder="Quantity" min="0">
+            <input type="number" class="form-control" id="stockReorder" placeholder="Reorder level" min="0">
+            <input type="number" class="form-control" id="stockPrice" placeholder="Unit price ($)" step="0.01" min="0">
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel" id="cancelStockBtn">Cancel</button>
+                <button class="dialog-btn save" id="saveStockBtn">Save</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Email Dialog -->
-<div class="dialog-overlay" id="emailDialog">
-    <div class="dialog">
-        <h3><i class="fas fa-envelope"></i> Email Report to Administration</h3>
-        <input type="email" id="adminEmail" placeholder="Administration email address" value="admin@jicoschool.edu">
-        <input type="text" id="emailSubject" placeholder="Email subject" value="Sickbay Report">
-        <textarea id="emailMessage" placeholder="Additional message (optional)">Please find attached the latest sickbay report.</textarea>
-        <input type="text" id="emailFileName" placeholder="Filename for attachment" value="sickbay_report">
-        <div class="dialog-buttons">
-            <button class="dialog-btn cancel" id="cancelEmailBtn">Cancel</button>
-            <button class="dialog-btn email" id="confirmEmailBtn">Send Email</button>
+    <!-- Import Dialog -->
+    <div class="dialog-overlay" id="importDialog">
+        <div class="dialog">
+            <h3><i class="fas fa-upload"></i> Import Student Database</h3>
+            <p style="margin-bottom: 1rem;">Upload CSV or Excel file with columns: Name, Class, Stream, Age, Gender, Contact</p>
+            <input type="file" class="form-control" id="importFile" accept=".csv,.xlsx,.xls">
+            <div id="importProgress" style="display: none; margin: 1rem 0;">
+                <div style="background: var(--neutral-200); border-radius: 60px; height: 10px; overflow: hidden;">
+                    <div id="importProgressBar" style="width: 0%; height: 100%; background: var(--primary-600); transition: width 0.3s;"></div>
+                </div>
+                <p id="importStatus" style="margin-top: 0.5rem; font-size: 0.9rem;"></p>
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel" id="cancelImportBtn">Cancel</button>
+                <button class="dialog-btn save" id="confirmImportBtn">Import</button>
+            </div>
         </div>
     </div>
-</div>
 
-<datalist id="drugSuggest">
-    <option value="Paracetamol"><option value="Amoxicillin"><option value="Artemether"><option value="Ibuprofen"><option value="Metronidazole"><option value="Cough syrup">
-</datalist>
+    <script>
+        // Professional Healthcare Management System
+        class HealthcareSystem {
+            constructor() {
+                this.db = null;
+                this.patients = [];
+                this.studentDatabase = [];
+                this.inventory = [];
+                this.dispensingLog = [];
+                this.medications = [];
+                this.referrals = [];
+                
+                this.DB_NAME = 'PulseHealthcareDB';
+                this.DB_VERSION = 2; // Incremented version for schema update
+                
+                this.init();
+            }
 
-<script>
-(function() {
-    // ------------------------------------------------------------------
-    // OFFLINE LOCAL DATABASE with Pulse_Files folder in Documents
-    // ------------------------------------------------------------------
-    const DB_NAME = 'PulseFilesDB';
-    const DB_VERSION = 2;
-    const STUDENT_STORE = 'sickbayStudents';
-    const IMPORT_STORE = 'importedStudentList';
-    const SETTINGS_STORE = 'appSettings';
+            async init() {
+                await this.initDatabase();
+                this.loadSampleData();
+                this.setupEventListeners();
+                this.refreshUI();
+                this.updateAllCharts();
+                this.updateInventoryDisplay();
+                this.updateDatabaseView();
+            }
 
-    let db = null;
-    let students = [];
-    let importedStudents = [];
-    let appSettings = {
-        pulseFolderPath: '',
-        adminEmail: 'admin@jicoschool.edu'
-    };
-
-    // Open IndexedDB and set up stores
-    function openDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-            request.onerror = (e) => { console.error('DB error', e); reject(e); };
-            request.onsuccess = (e) => { 
-                db = e.target.result;
-                initializeApp();
-                resolve(db);
-            };
-            request.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(STUDENT_STORE)) {
-                    db.createObjectStore(STUDENT_STORE, { keyPath: 'id' });
-                }
-                if (!db.objectStoreNames.contains(IMPORT_STORE)) {
-                    db.createObjectStore(IMPORT_STORE, { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
-                    db.createObjectStore(SETTINGS_STORE, { keyPath: 'key' });
-                }
-            };
-        });
-    }
-
-    // Initialize app: create Pulse_Files folder and load data
-    function initializeApp() {
-        // Check if pywebview is available
-        if (window.pywebview && window.pywebview.api) {
-            // Initialize Pulse_Files folder
-            window.pywebview.api.initialize_pulse_folder()
-                .then(result => {
-                    if (result.success) {
-                        appSettings.pulseFolderPath = result.folder_path;
-                        updateFolderDisplay();
+            async initDatabase() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                    
+                    request.onerror = () => {
+                        console.error('IndexedDB error:', request.error);
+                        reject(request.error);
+                    };
+                    
+                    request.onsuccess = (e) => {
+                        this.db = e.target.result;
+                        this.loadFromDB();
+                        resolve();
+                    };
+                    
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
                         
-                        // Load data from files in the folder
-                        return window.pywebview.api.load_data_from_folder();
-                    }
-                })
-                .then(result => {
-                    if (result && result.success) {
-                        // Load data into memory
-                        if (result.students) {
-                            students = result.students;
+                        if (!db.objectStoreNames.contains('patients')) {
+                            const patientStore = db.createObjectStore('patients', { keyPath: 'id' });
+                            patientStore.createIndex('status', 'status', { unique: false });
+                            patientStore.createIndex('registrationDate', 'registrationDate', { unique: false });
                         }
-                        if (result.imported_students) {
-                            importedStudents = result.imported_students;
+                        
+                        if (!db.objectStoreNames.contains('studentDatabase')) {
+                            const studentStore = db.createObjectStore('studentDatabase', { keyPath: 'id', autoIncrement: true });
+                            studentStore.createIndex('name', 'name', { unique: false });
                         }
-                        refreshStudentNameList();
-                        refreshUI('');
+                        
+                        if (!db.objectStoreNames.contains('inventory')) {
+                            const inventoryStore = db.createObjectStore('inventory', { keyPath: 'id', autoIncrement: true });
+                            inventoryStore.createIndex('name', 'name', { unique: false });
+                            inventoryStore.createIndex('quantity', 'quantity', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('dispensing')) {
+                            const dispStore = db.createObjectStore('dispensing', { keyPath: 'id', autoIncrement: true });
+                            dispStore.createIndex('date', 'date', { unique: false });
+                            dispStore.createIndex('patient', 'patient', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('medications')) {
+                            db.createObjectStore('medications', { keyPath: 'id', autoIncrement: true });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('referrals')) {
+                            db.createObjectStore('referrals', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                });
+            }
+
+            loadFromDB() {
+                try {
+                    // Load patients
+                    const tx = this.db.transaction('patients', 'readonly');
+                    const store = tx.objectStore('patients');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        this.patients = req.result || [];
+                        this.refreshUI();
+                    };
+                    req.onerror = () => console.error('Error loading patients:', req.error);
+
+                    // Load inventory
+                    const invTx = this.db.transaction('inventory', 'readonly');
+                    const invStore = invTx.objectStore('inventory');
+                    const invReq = invStore.getAll();
+                    invReq.onsuccess = () => {
+                        this.inventory = invReq.result || [];
+                        this.updateInventoryDisplay();
+                    };
+                    invReq.onerror = () => console.error('Error loading inventory:', invReq.error);
+
+                    // Load dispensing log
+                    const dispTx = this.db.transaction('dispensing', 'readonly');
+                    const dispStore = dispTx.objectStore('dispensing');
+                    const dispReq = dispStore.getAll();
+                    dispReq.onsuccess = () => {
+                        this.dispensingLog = dispReq.result || [];
+                    };
+                    dispReq.onerror = () => console.error('Error loading dispensing log:', dispReq.error);
+                } catch (error) {
+                    console.error('Error loading from DB:', error);
+                }
+            }
+
+            loadSampleData() {
+                // Only add sample data if database is empty
+                if (this.patients.length === 0) {
+                    // Add default inventory if empty
+                    if (this.inventory.length === 0) {
+                        this.inventory = [
+                            { id: 1, name: 'Paracetamol', quantity: 500, reorderLevel: 100, price: 0.05, unit: 'tablets' },
+                            { id: 2, name: 'Amoxicillin', quantity: 300, reorderLevel: 50, price: 0.15, unit: 'capsules' },
+                            { id: 3, name: 'Ibuprofen', quantity: 400, reorderLevel: 80, price: 0.08, unit: 'tablets' },
+                            { id: 4, name: 'Artemether', quantity: 100, reorderLevel: 30, price: 2.50, unit: 'doses' },
+                            { id: 5, name: 'Cough Syrup', quantity: 50, reorderLevel: 20, price: 3.00, unit: 'bottles' }
+                        ];
+                        this.saveInventory();
                     }
-                })
-                .catch(error => {
-                    console.error('Error initializing folder:', error);
-                    // Fallback to IndexedDB
-                    loadFromIndexedDB();
-                });
-        } else {
-            // Browser mode - use IndexedDB
-            document.getElementById('folderPathDisplay').innerHTML = 
-                '<i class="fas fa-info-circle"></i> Browser mode: Data stored in browser storage';
-            loadFromIndexedDB();
-        }
-    }
-
-    // Load data from IndexedDB (fallback)
-    function loadFromIndexedDB() {
-        loadStudentsFromDB().then(() => {
-            return loadImportedFromDB();
-        }).then(() => {
-            refreshStudentNameList();
-            refreshUI('');
-        });
-    }
-
-    // Save students to IndexedDB
-    function saveStudentsToDB() {
-        if (!db) return;
-        const tx = db.transaction(STUDENT_STORE, 'readwrite');
-        const store = tx.objectStore(STUDENT_STORE);
-        store.clear();
-        students.forEach(s => store.put(s));
-        
-        // Also save to file if in pywebview mode
-        if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.save_students_to_file(students);
-        }
-    }
-
-    // Load students from IndexedDB
-    function loadStudentsFromDB() {
-        return new Promise((resolve) => {
-            if (!db) return resolve([]);
-            const tx = db.transaction(STUDENT_STORE, 'readonly');
-            const store = tx.objectStore(STUDENT_STORE);
-            const req = store.getAll();
-            req.onsuccess = () => { students = req.result || []; resolve(students); };
-            req.onerror = () => { students = []; resolve([]); };
-        });
-    }
-
-    // Save imported list to IndexedDB
-    function saveImportedToDB(list) {
-        if (!db) return;
-        const tx = db.transaction(IMPORT_STORE, 'readwrite');
-        const store = tx.objectStore(IMPORT_STORE);
-        store.clear();
-        list.forEach((item, idx) => { item.id = idx; store.put(item); });
-        
-        // Also save to file if in pywebview mode
-        if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.save_imported_to_file(list);
-        }
-    }
-
-    // Load imported list from IndexedDB
-    function loadImportedFromDB() {
-        return new Promise((resolve) => {
-            if (!db) return resolve([]);
-            const tx = db.transaction(IMPORT_STORE, 'readonly');
-            const store = tx.objectStore(IMPORT_STORE);
-            const req = store.getAll();
-            req.onsuccess = () => { 
-                importedStudents = (req.result || []).map(({id, ...rest}) => rest); 
-                resolve(importedStudents);
-            };
-            req.onerror = () => { importedStudents = []; resolve([]); };
-        });
-    }
-
-    // Update folder display
-    function updateFolderDisplay() {
-        const display = document.getElementById('folderPathDisplay');
-        if (appSettings.pulseFolderPath) {
-            display.innerHTML = `<i class="fas fa-folder-open"></i> Data folder: ${appSettings.pulseFolderPath}`;
-            document.getElementById('saveFolderPath').textContent = appSettings.pulseFolderPath;
-        }
-    }
-
-    // Refresh student name datalist
-    function refreshStudentNameList() {
-        const list = document.getElementById('studentNameList');
-        list.innerHTML = '';
-        importedStudents.forEach(s => {
-            if (s.Name) {
-                const opt = document.createElement('option');
-                opt.value = s.Name;
-                list.appendChild(opt);
-            }
-        });
-    }
-
-    // Get next patient number
-    function getNextPatientNumber() {
-        let max = 0; 
-        students.forEach(s => { 
-            let n = parseInt(s.patientNumber?.substring(1)||'0',10); 
-            if (n>max) max=n;
-        });
-        return 'P' + String(max+1).padStart(3,'0');
-    }
-
-    // DOM elements
-    const listContainer = document.getElementById('student-list-container');
-    const totalSpan = document.getElementById('total-visits');
-    const ongoingSpan = document.getElementById('ongoing-count');
-    const addBtn = document.getElementById('addStudentBtn');
-    const searchInput = document.getElementById('searchInput');
-    const nameInp = document.getElementById('student-name');
-    const classInp = document.getElementById('student-class');
-    const streamInp = document.getElementById('student-stream');
-    const ageInp = document.getElementById('age');
-    const symptomsInp = document.getElementById('symptoms');
-    const drugListDiv = document.getElementById('drug-list');
-    const addDrugBtn = document.getElementById('addDrugBtn');
-    const lookupInput = document.getElementById('lookupStudentName');
-    const fillBtn = document.getElementById('fillFromLookupBtn');
-    
-    // Dialog elements
-    const saveDialog = document.getElementById('saveDialog');
-    const emailDialog = document.getElementById('emailDialog');
-    const saveFileName = document.getElementById('saveFileName');
-    const cancelSaveBtn = document.getElementById('cancelSaveBtn');
-    const confirmSaveBtn = document.getElementById('confirmSaveBtn');
-    const adminEmail = document.getElementById('adminEmail');
-    const emailSubject = document.getElementById('emailSubject');
-    const emailMessage = document.getElementById('emailMessage');
-    const emailFileName = document.getElementById('emailFileName');
-    const cancelEmailBtn = document.getElementById('cancelEmailBtn');
-    const confirmEmailBtn = document.getElementById('confirmEmailBtn');
-    
-    // Pending data for save/email
-    let pendingSaveData = null;
-
-    // Fill form from imported list
-    fillBtn.addEventListener('click', () => {
-        const searchName = lookupInput.value.trim().toLowerCase();
-        const match = importedStudents.find(s => s.Name?.toLowerCase() === searchName);
-        if (!match) { alert('Name not found in imported list'); return; }
-        nameInp.value = match.Name || '';
-        if (match.Class) { 
-            let optionExists = false;
-            for (let opt of classInp.options) { 
-                if (opt.value === match.Class) { 
-                    classInp.value = match.Class; 
-                    optionExists = true; 
-                    break; 
                 }
             }
-            if (!optionExists) classInp.value = match.Class;
-        }
-        if (match.Stream) { 
-            let optExists = false;
-            for (let opt of streamInp.options) { 
-                if (opt.value === match.Stream) { 
-                    streamInp.value = match.Stream; 
-                    optExists = true; 
-                    break; 
+
+            savePatients() {
+                try {
+                    const tx = this.db.transaction('patients', 'readwrite');
+                    const store = tx.objectStore('patients');
+                    store.clear();
+                    this.patients.forEach(p => store.put(p));
+                } catch (error) {
+                    console.error('Error saving patients:', error);
                 }
             }
-            if (!optExists) streamInp.value = match.Stream;
-        }
-        if (match.Age) ageInp.value = match.Age;
-        if (match.Gender) document.getElementById('gender').value = match.Gender;
-    });
 
-    // Drug row factory
-    function createDrugEntry(drug = { name: '', dosage: '', duration: 3, status: 'ongoing', timesPerDay: 2 }) {
-        const div = document.createElement('div'); 
-        div.className = 'drug-entry';
-        div.innerHTML = `
-            <input type="text" class="drug-name" placeholder="Drug" value="${drug.name}" list="drugSuggest">
-            <input type="text" class="drug-dosage" placeholder="Dosage" value="${drug.dosage}">
-            <input type="number" class="drug-duration" placeholder="Days" value="${drug.duration}" min="1" style="width:70px;">
-            <select class="drug-status" style="width:100px;">
-                <option value="ongoing" ${drug.status==='ongoing'?'selected':''}>Ongoing</option>
-                <option value="completed" ${drug.status==='completed'?'selected':''}>Completed</option>
-            </select>
-            <select class="drug-times" style="width:60px;" title="times/day">
-                <option value="1" ${drug.timesPerDay==1?'selected':''}>1x</option>
-                <option value="2" ${drug.timesPerDay==2?'selected':''}>2x</option>
-                <option value="3" ${drug.timesPerDay==3?'selected':''}>3x</option>
-            </select>
-            <button class="remove-drug"><i class="fas fa-times-circle"></i></button>
-        `;
-        div.querySelector('.remove-drug').addEventListener('click', function(e) { 
-            e.stopPropagation(); 
-            if (document.querySelectorAll('.drug-entry').length>1) {
-                div.remove(); 
-            } else {
-                alert('At least one drug required'); 
-            }
-        });
-        return div;
-    }
-
-    function resetDrugList() { 
-        drugListDiv.innerHTML = ''; 
-        drugListDiv.appendChild(createDrugEntry({ name:'Paracetamol', dosage:'2x 500mg', duration:3, status:'ongoing', timesPerDay:2 })); 
-    }
-    
-    resetDrugList();
-    addDrugBtn.addEventListener('click', ()=> drugListDiv.appendChild(createDrugEntry({ name:'', dosage:'', duration:3, timesPerDay:2 })));
-
-    function collectDrugsFromForm() {
-        let drugs = [];
-        document.querySelectorAll('.drug-entry').forEach(div => {
-            let name = div.querySelector('.drug-name')?.value.trim();
-            if (name) drugs.push({
-                name: name,
-                dosage: div.querySelector('.drug-dosage')?.value.trim()||'',
-                duration: parseInt(div.querySelector('.drug-duration')?.value)||1,
-                status: div.querySelector('.drug-status')?.value||'ongoing',
-                timesPerDay: parseInt(div.querySelector('.drug-times')?.value)||2
-            });
-        });
-        return drugs.length ? drugs : [{ name:'none', dosage:'', duration:1, status:'completed', timesPerDay:1 }];
-    }
-
-    let selectedStudentId = null;
-    
-    function refreshUI(filter = '') {
-        totalSpan.innerText = students.length;
-        let ongoing = students.reduce((acc,s)=> acc + (s.drugs ? s.drugs.filter(d=>d.status==='ongoing').length : 0), 0);
-        ongoingSpan.innerText = ongoing;
-
-        let today = new Date().toISOString().slice(0,10);
-        let totalDoses = 0, takenDoses = 0;
-        students.forEach(s => { 
-            if (s.adherence && s.adherence[today]) { 
-                Object.entries(s.adherence[today]).forEach(([dn, times]) => { 
-                    ['morning','afternoon','evening'].forEach(t => { 
-                        if (times[t]!==undefined) { 
-                            totalDoses++; 
-                            if (times[t]===true) takenDoses++; 
-                        } 
-                    }); 
-                }); 
-            } 
-        });
-        let pct = totalDoses ? Math.round(takenDoses/totalDoses*100) : 0;
-        document.getElementById('adherence-today').innerText = pct+'%';
-        document.getElementById('takenCounter').innerText = takenDoses;
-        document.getElementById('totalDosesCounter').innerText = totalDoses;
-
-        let filtered = students;
-        if (filter.trim()) filtered = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()) || s.patientNumber.includes(filter));
-
-        listContainer.innerHTML = '';
-        filtered.forEach(s => {
-            let li = document.createElement('li');
-            li.className = `student-item ${selectedStudentId === s.id ? 'selected' : ''}`;
-            li.setAttribute('data-id', s.id);
-            li.innerHTML = `<h4>${s.name} · ${s.patientNumber}</h4><small>${s.class} · ${s.symptoms.substring(0,20)}</small>`;
-            li.addEventListener('click', () => { 
-                selectedStudentId = s.id; 
-                refreshUI(searchInput.value); 
-                renderDetail(s.id); 
-            });
-            listContainer.appendChild(li);
-        });
-
-        if (selectedStudentId && students.find(s=>s.id===selectedStudentId)) {
-            renderDetail(selectedStudentId);
-        } else { 
-            document.getElementById('detailContent').style.display = 'none'; 
-            document.getElementById('emptyDetailMsg').style.display = 'block'; 
-        }
-
-        let nums = students.map(s=>parseInt(s.patientNumber.substring(1))).filter(n=>!isNaN(n));
-        if (nums.length) { 
-            let min = Math.min(...nums); 
-            let max = Math.max(...nums); 
-            document.getElementById('patientRange').innerText = `P${min}..P${max}`; 
-        }
-        
-        let missedToday = 0;
-        students.forEach(s => { 
-            if (s.adherence && s.adherence[today]) { 
-                Object.values(s.adherence[today]).forEach(t => { 
-                    if (t.morning===false) missedToday++;
-                    if (t.afternoon===false) missedToday++;
-                    if (t.evening===false) missedToday++;
-                }); 
-            } 
-        });
-        document.getElementById('followUpCount').innerText = missedToday;
-
-        updateChartsAndMissed();
-        saveStudentsToDB();
-    }
-
-    function renderDetail(id) {
-        let s = students.find(s=>s.id===id);
-        if (!s) return;
-        document.getElementById('emptyDetailMsg').style.display = 'none';
-        document.getElementById('detailContent').style.display = 'block';
-        document.getElementById('detailName').innerText = s.name;
-        document.getElementById('detailID').innerText = s.patientNumber;
-        document.getElementById('detailClass').innerText = s.class + ' · ' + s.stream;
-        document.getElementById('detailSymptoms').innerText = s.symptoms;
-        let drugStr = s.drugs.map(d=>`${d.name} (${d.dosage} ${d.timesPerDay}x/d)`).join(', ');
-        document.getElementById('detailDrugs').innerText = drugStr;
-
-        let today = new Date().toISOString().slice(0,10);
-        if (!s.adherence) s.adherence = {};
-        if (!s.adherence[today]) { 
-            s.adherence[today] = {}; 
-            s.drugs.forEach(d => { 
-                if (d.status==='ongoing') {
-                    s.adherence[today][d.name] = { morning: null, afternoon: null, evening: null }; 
+            saveInventory() {
+                try {
+                    const tx = this.db.transaction('inventory', 'readwrite');
+                    const store = tx.objectStore('inventory');
+                    store.clear();
+                    this.inventory.forEach(i => store.put(i));
+                } catch (error) {
+                    console.error('Error saving inventory:', error);
                 }
-            }); 
-        }
-
-        let container = document.getElementById('doseTrackingContainer');
-        container.innerHTML = '';
-        s.drugs.filter(d=>d.status==='ongoing').forEach(drug => {
-            let times = drug.timesPerDay || 2;
-            let slots = ['morning','afternoon','evening'].slice(0, times);
-            let row = document.createElement('div'); 
-            row.className = 'dose-row';
-            row.innerHTML = `<span style="width:100px;">${drug.name}</span>`;
-            let iconDiv = document.createElement('div'); 
-            iconDiv.className = 'dose-icons';
-            let ad = s.adherence[today][drug.name] || { morning: null, afternoon: null, evening: null };
-            slots.forEach(slot => {
-                let icon = document.createElement('i');
-                icon.className = `fas ${ad[slot] === true ? 'fa-check-circle' : (ad[slot] === false ? 'fa-times-circle' : 'fa-circle')}`;
-                icon.setAttribute('data-drug', drug.name); 
-                icon.setAttribute('data-slot', slot);
-                icon.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    let curr = s.adherence[today][drug.name]?.[slot];
-                    let newVal = curr === true ? false : (curr === false ? null : true);
-                    if (!s.adherence[today][drug.name]) s.adherence[today][drug.name] = {};
-                    s.adherence[today][drug.name][slot] = newVal;
-                    renderDetail(id);
-                    refreshUI(searchInput.value);
-                });
-                iconDiv.appendChild(icon);
-            });
-            row.appendChild(iconDiv);
-            container.appendChild(row);
-        });
-    }
-
-    let diseaseChart, statusChart;
-    
-    function updateChartsAndMissed() {
-        let diseases = {}; 
-        students.forEach(s => { 
-            let sym = s.symptoms.split(',')[0].trim() || 'other'; 
-            diseases[sym] = (diseases[sym]||0)+1; 
-        });
-        
-        let ctx1 = document.getElementById('diseaseChart').getContext('2d');
-        if (diseaseChart) diseaseChart.destroy();
-        diseaseChart = new Chart(ctx1, { 
-            type:'doughnut', 
-            data: { 
-                labels: Object.keys(diseases), 
-                datasets: [{ 
-                    data: Object.values(diseases), 
-                    backgroundColor: ['#2e8b57','#cd5c5c','#4682b4','#daa520','#6a4e9a'] 
-                }] 
-            } 
-        });
-
-        let ongoingCnt = students.filter(s=> s.drugs.some(d=>d.status==='ongoing')).length;
-        let completedCnt = students.length - ongoingCnt;
-        let ctx2 = document.getElementById('statusChart').getContext('2d');
-        if (statusChart) statusChart.destroy();
-        statusChart = new Chart(ctx2, { 
-            type:'bar', 
-            data: { 
-                labels: ['Ongoing','Completed'], 
-                datasets: [{ 
-                    data: [ongoingCnt, completedCnt], 
-                    backgroundColor: '#1e6f9c' 
-                }] 
-            } 
-        });
-
-        let today = new Date().toISOString().slice(0,10);
-        let missedList = [];
-        students.forEach(s => {
-            if (s.adherence && s.adherence[today]) {
-                let missedCount = 0;
-                Object.entries(s.adherence[today]).forEach(([drug, times]) => {
-                    if (times.morning === false) missedCount++;
-                    if (times.afternoon === false) missedCount++;
-                    if (times.evening === false) missedCount++;
-                });
-                if (missedCount > 0) missedList.push({ name: s.name, patient: s.patientNumber, missed: missedCount });
             }
-        });
-        
-        let container = document.getElementById('missedDosesContainer');
-        if (missedList.length === 0) {
-            container.innerHTML = '<p>✅ No missed doses today.</p>';
-        } else {
-            let html = '';
-            missedList.forEach(m => html += `<div class="missed-item"><span>${m.name} (${m.patient})</span><span style="color:#b34a00;">${m.missed} missed</span></div>`);
-            container.innerHTML = html;
-        }
 
-        let top = Object.keys(diseases).reduce((a,b)=> diseases[a] > diseases[b] ? a : b, '—');
-        document.getElementById('topDisease').innerText = top;
-        document.getElementById('activePatients').innerText = students.length;
-        
-        // Calculate weekly adherence (simplified)
-        let weeklyAdherence = calculateWeeklyAdherence();
-        document.getElementById('weeklyAdh').innerText = weeklyAdherence + '%';
-    }
+            saveDispensing() {
+                try {
+                    const tx = this.db.transaction('dispensing', 'readwrite');
+                    const store = tx.objectStore('dispensing');
+                    store.clear();
+                    this.dispensingLog.forEach(d => store.put(d));
+                } catch (error) {
+                    console.error('Error saving dispensing log:', error);
+                }
+            }
 
-    function calculateWeeklyAdherence() {
-        // Simplified weekly adherence calculation
-        let totalPossible = 0;
-        let totalTaken = 0;
-        let today = new Date();
-        
-        for (let i = 0; i < 7; i++) {
-            let date = new Date(today);
-            date.setDate(date.getDate() - i);
-            let dateStr = date.toISOString().slice(0,10);
-            
-            students.forEach(s => {
-                if (s.adherence && s.adherence[dateStr]) {
-                    Object.values(s.adherence[dateStr]).forEach(times => {
-                        ['morning','afternoon','evening'].forEach(slot => {
-                            if (times[slot] !== undefined) {
-                                totalPossible++;
-                                if (times[slot] === true) totalTaken++;
-                            }
+            saveStudentDatabase() {
+                try {
+                    const tx = this.db.transaction('studentDatabase', 'readwrite');
+                    const store = tx.objectStore('studentDatabase');
+                    store.clear();
+                    this.studentDatabase.forEach(s => store.put(s));
+                } catch (error) {
+                    console.error('Error saving student database:', error);
+                }
+            }
+
+            getNextPatientId() {
+                let max = 0;
+                this.patients.forEach(p => {
+                    let num = parseInt(p.id?.replace('P', '')) || 0;
+                    if (num > max) max = num;
+                });
+                return 'P' + String(max + 1).padStart(4, '0');
+            }
+
+            registerPatient(data) {
+                const patient = {
+                    id: this.getNextPatientId(),
+                    ...data,
+                    registrationDate: new Date().toISOString(),
+                    status: 'active',
+                    visits: 1,
+                    adherence: {}
+                };
+
+                this.patients.push(patient);
+                this.savePatients();
+                
+                // Add to dispensing log if medications prescribed
+                if (patient.medications && patient.medications.length > 0) {
+                    patient.medications.forEach(med => {
+                        this.dispensingLog.push({
+                            id: Date.now() + Math.random(),
+                            date: new Date().toISOString().slice(0, 10),
+                            medication: med.name,
+                            quantity: 1,
+                            patient: patient.id,
+                            nurse: 'System',
+                            type: 'prescription'
                         });
                     });
+                    this.saveDispensing();
                 }
-            });
-        }
-        
-        return totalPossible > 0 ? Math.round((totalTaken / totalPossible) * 100) : 0;
-    }
 
-    // Add student
-    addBtn.addEventListener('click', () => {
-        let name = nameInp.value.trim(); 
-        if (!name) return alert('Enter name');
-        let drugs = collectDrugsFromForm();
-        let newStudent = {
-            id: 's'+Date.now()+Math.random().toString(36).substr(2,5),
-            patientNumber: getNextPatientNumber(),
-            name, 
-            class: classInp.value||'—', 
-            stream: streamInp.value,
-            age: parseInt(ageInp.value)||15, 
-            gender:'Male', 
-            symptoms: symptomsInp.value.trim()||'—',
-            drugs: drugs,
-            adherence: {},
-            date: new Date().toISOString().slice(0,10)
-        };
-        students.push(newStudent);
-        refreshUI(searchInput.value);
-        nameInp.value = ''; 
-        classInp.value = 'S.1'; 
-        streamInp.value='East'; 
-        ageInp.value='15'; 
-        symptomsInp.value='Fever';
-        resetDrugList();
-    });
+                return patient;
+            }
 
-    // Search
-    searchInput.addEventListener('input', () => refreshUI(searchInput.value));
+            updateDose(patientId, medication, slot, value) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (!patient) return;
 
-    // Generate Excel data
-    function generateExcelData() {
-        let data = [['PatientID','Name','Class','Stream','Age','Symptoms','Drugs','Status','AdherenceSummary']];
-        students.forEach(s => {
-            let drugStr = s.drugs.map(d=>`${d.name} (${d.dosage} ${d.timesPerDay}x/d)`).join('; ');
-            let adSum = '';
-            if (s.adherence) {
-                Object.entries(s.adherence).forEach(([date, drugs]) => {
-                    adSum += date + ':';
-                    Object.entries(drugs).forEach(([dn, times]) => { 
-                        adSum += dn + ' M:'+times.morning+' A:'+times.afternoon+' E:'+times.evening+' '; 
+                const today = new Date().toISOString().slice(0, 10);
+                if (!patient.adherence) patient.adherence = {};
+                if (!patient.adherence[today]) patient.adherence[today] = {};
+                if (!patient.adherence[today][medication]) {
+                    patient.adherence[today][medication] = { morning: null, afternoon: null, evening: null };
+                }
+
+                patient.adherence[today][medication][slot] = value;
+
+                // Update inventory if dose taken
+                if (value === true) {
+                    const inventoryItem = this.inventory.find(i => 
+                        i.name?.toLowerCase() === medication.toLowerCase()
+                    );
+                    if (inventoryItem) {
+                        inventoryItem.quantity = Math.max(0, inventoryItem.quantity - 1);
+                        
+                        this.dispensingLog.push({
+                            id: Date.now(),
+                            date: today,
+                            medication: medication,
+                            quantity: 1,
+                            patient: patientId,
+                            nurse: 'System',
+                            dose: slot
+                        });
+                        
+                        this.saveInventory();
+                        this.saveDispensing();
+                    }
+                }
+
+                this.savePatients();
+                this.refreshUI();
+            }
+
+            markPatientCompleted(patientId) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (patient) {
+                    patient.status = 'completed';
+                    if (patient.medications) {
+                        patient.medications.forEach(m => m.status = 'completed');
+                    }
+                    this.savePatients();
+                    this.refreshUI();
+                }
+            }
+
+            refreshUI() {
+                // Update stats
+                document.getElementById('totalPatients').textContent = this.patients.length;
+                document.getElementById('activePatients').textContent = this.patients.filter(p => p.status === 'active').length;
+                
+                const today = new Date().toISOString().slice(0, 10);
+                document.getElementById('todayVisits').textContent = this.patients.filter(p => 
+                    p.registrationDate?.startsWith(today)
+                ).length;
+                
+                document.getElementById('lowStock').textContent = this.inventory.filter(i => 
+                    i.quantity <= i.reorderLevel
+                ).length;
+
+                // Update patient list
+                this.renderPatientList();
+                
+                // Update patients table
+                this.renderPatientsTable();
+                
+                // Update footer stats
+                document.getElementById('footerRecords').textContent = this.patients.length;
+                
+                let totalDoses = 0;
+                let takenDoses = 0;
+                this.patients.forEach(p => {
+                    if (p.adherence && p.adherence[today]) {
+                        Object.values(p.adherence[today]).forEach(doses => {
+                            Object.values(doses).forEach(v => {
+                                if (v !== undefined && v !== null) {
+                                    totalDoses++;
+                                    if (v === true) takenDoses++;
+                                }
+                            });
+                        });
+                    }
+                });
+                
+                document.getElementById('footerDoses').textContent = totalDoses > 0 ? `${takenDoses}/${totalDoses}` : '0/0';
+                
+                let missedDoses = 0;
+                this.patients.forEach(p => {
+                    if (p.adherence && p.adherence[today]) {
+                        Object.values(p.adherence[today]).forEach(doses => {
+                            if (doses.morning === false) missedDoses++;
+                            if (doses.afternoon === false) missedDoses++;
+                            if (doses.evening === false) missedDoses++;
+                        });
+                    }
+                });
+                document.getElementById('footerMissed').textContent = missedDoses;
+                
+                document.getElementById('footerTime').textContent = new Date().toLocaleTimeString();
+                
+                // Update report stats
+                document.getElementById('reportTotalPatients').textContent = this.patients.length;
+                const thisMonth = new Date().toISOString().slice(0, 7);
+                document.getElementById('reportThisMonth').textContent = this.patients.filter(p => 
+                    p.registrationDate?.startsWith(thisMonth)
+                ).length;
+                document.getElementById('reportRecovered').textContent = this.patients.filter(p => 
+                    p.status === 'completed'
+                ).length;
+                document.getElementById('reportActive').textContent = this.patients.filter(p => 
+                    p.status === 'active'
+                ).length;
+
+                // Update database stats
+                document.getElementById('dbTotalRecords').textContent = this.patients.length + this.inventory.length + this.dispensingLog.length;
+                
+                // Calculate storage size (estimate)
+                const jsonString = JSON.stringify({
+                    patients: this.patients,
+                    inventory: this.inventory,
+                    dispensing: this.dispensingLog,
+                    studentDatabase: this.studentDatabase
+                });
+                const size = new Blob([jsonString]).size;
+                document.getElementById('dbStorageSize').textContent = (size / 1024).toFixed(2) + ' KB';
+
+                // Update analytics stats
+                this.updateAnalyticsStats();
+            }
+
+            updateAnalyticsStats() {
+                // Average recovery time (mock calculation)
+                const completed = this.patients.filter(p => p.status === 'completed');
+                if (completed.length > 0) {
+                    let totalDays = completed.reduce((sum, p) => {
+                        if (p.registrationDate && p.medications?.length) {
+                            const start = new Date(p.registrationDate);
+                            const end = new Date(start);
+                            end.setDate(end.getDate() + (p.medications[0]?.duration || 3));
+                            return sum + Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                        }
+                        return sum + 3;
+                    }, 0);
+                    document.getElementById('avgRecoveryTime').textContent = Math.round(totalDays / completed.length);
+                } else {
+                    document.getElementById('avgRecoveryTime').textContent = '—';
+                }
+
+                // Peak hour (mock)
+                document.getElementById('peakHour').textContent = '10:30';
+
+                // Most common condition
+                const conditions = {};
+                this.patients.forEach(p => {
+                    if (p.symptoms) {
+                        const main = p.symptoms.split(',')[0].trim();
+                        conditions[main] = (conditions[main] || 0) + 1;
+                    }
+                });
+                const mostCommon = Object.entries(conditions).sort((a,b) => b[1] - a[1])[0];
+                document.getElementById('commonCondition').textContent = mostCommon ? mostCommon[0] : '—';
+
+                // Referral rate
+                const referred = this.patients.filter(p => p.referral).length;
+                const rate = this.patients.length ? ((referred / this.patients.length) * 100).toFixed(1) : 0;
+                document.getElementById('referralRate').textContent = rate + '%';
+            }
+
+            renderPatientList() {
+                const container = document.getElementById('patientList');
+                const searchTerm = document.getElementById('patientSearch')?.value.toLowerCase() || '';
+                
+                let filteredPatients = this.patients;
+                if (searchTerm) {
+                    filteredPatients = this.patients.filter(p => 
+                        p.name?.toLowerCase().includes(searchTerm) ||
+                        p.id?.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                container.innerHTML = filteredPatients.map(p => `
+                    <div class="patient-item" data-id="${p.id}">
+                        <div>
+                            <strong>${p.name || 'Unnamed'}</strong>
+                            <br>
+                            <small>${p.id} · ${p.class || 'N/A'} ${p.stream || ''}</small>
+                        </div>
+                        <span class="patient-status status-${p.status}">
+                            ${p.status === 'active' ? '🟢 Active' : '✅ Completed'}
+                        </span>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                document.querySelectorAll('.patient-item').forEach(item => {
+                    item.addEventListener('click', () => this.showPatientDetail(item.dataset.id));
+                });
+            }
+
+            renderPatientsTable() {
+                const tbody = document.getElementById('patientsTableBody');
+                tbody.innerHTML = this.patients.map(p => `
+                    <tr>
+                        <td>${p.id || 'N/A'}</td>
+                        <td>${p.name || 'N/A'}</td>
+                        <td>${p.class || 'N/A'} ${p.stream || ''}</td>
+                        <td>${p.age || 'N/A'}</td>
+                        <td>${p.gender || 'N/A'}</td>
+                        <td>${p.symptoms || 'N/A'}</td>
+                        <td>
+                            <span class="patient-status status-${p.status || 'active'}">
+                                ${p.status === 'active' ? 'Active' : 'Completed'}
+                            </span>
+                        </td>
+                        <td>${p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <button class="btn-lookup" onclick="system.showPatientDetail('${p.id}')" style="padding: 0.3rem 1rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            showPatientDetail(patientId) {
+                const patient = this.patients.find(p => p.id === patientId);
+                if (!patient) return;
+
+                document.getElementById('emptyDetailMessage').style.display = 'none';
+                document.getElementById('patientDetailContent').style.display = 'block';
+                document.getElementById('detailPatientName').textContent = patient.name || 'Unknown';
+                document.getElementById('detailPatientId').textContent = patient.id || 'N/A';
+                document.getElementById('detailClass').textContent = `${patient.class || 'N/A'} · ${patient.stream || 'N/A'}`;
+                document.getElementById('detailAgeGender').textContent = `${patient.age || 'N/A'} years · ${patient.gender || 'N/A'}`;
+                document.getElementById('detailContact').textContent = patient.contact || 'Not provided';
+                document.getElementById('detailSymptoms').textContent = patient.symptoms || 'None';
+                document.getElementById('detailDate').textContent = patient.registrationDate ? 
+                    new Date(patient.registrationDate).toLocaleDateString() : 'N/A';
+
+                // Render medications
+                const medsDiv = document.getElementById('detailMedications');
+                if (patient.medications && patient.medications.length > 0) {
+                    medsDiv.innerHTML = patient.medications.map(m => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: white; border-radius: 30px; margin-bottom: 0.3rem;">
+                            <span><strong>${m.name || 'Unknown'}</strong> ${m.dosage || ''}</span>
+                            <span>${m.timesPerDay || 0}x/day for ${m.duration || 0} days</span>
+                            <span style="color: ${m.status === 'active' ? '#b34a00' : '#2e8b57'}">
+                                ${m.status === 'active' ? '🟡 Ongoing' : '✅ Completed'}
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    medsDiv.innerHTML = '<p>No medications prescribed</p>';
+                }
+
+                // Show referral if exists
+                if (patient.referral) {
+                    document.getElementById('detailReferral').style.display = 'block';
+                    document.getElementById('referralText').textContent = 
+                        `Referred to ${patient.referral.to || 'Unknown'} at ${patient.referral.time || 'N/A'} - ${patient.referral.reason || ''}`;
+                } else {
+                    document.getElementById('detailReferral').style.display = 'none';
+                }
+
+                // Show/hide mark completed button
+                const markBtn = document.getElementById('markCompletedBtn');
+                if (patient.status === 'active') {
+                    markBtn.style.display = 'block';
+                    markBtn.onclick = () => this.markPatientCompleted(patient.id);
+                } else {
+                    markBtn.style.display = 'none';
+                }
+
+                // Render dose tracking
+                this.renderDoseTracking(patient);
+            }
+
+            renderDoseTracking(patient) {
+                const container = document.getElementById('doseTracking');
+                const today = new Date().toISOString().slice(0, 10);
+
+                if (!patient.medications || patient.medications.length === 0) {
+                    container.innerHTML = '<p>No medications to track</p>';
+                    return;
+                }
+
+                const activeMeds = patient.medications.filter(m => m.status === 'active');
+                if (activeMeds.length === 0) {
+                    container.innerHTML = '<p>All medications completed</p>';
+                    return;
+                }
+
+                container.innerHTML = activeMeds.map(med => {
+                    const times = med.timesPerDay || 2;
+                    const slots = ['morning', 'afternoon', 'evening'].slice(0, times);
+                    const adherence = patient.adherence?.[today]?.[med.name] || {};
+
+                    return `
+                        <div class="dose-row">
+                            <span style="width: 120px;"><strong>${med.name}</strong></span>
+                            <div class="dose-icons">
+                                ${slots.map(slot => {
+                                    const status = adherence[slot];
+                                    const iconClass = status === true ? 'fa-check-circle' : 
+                                                     status === false ? 'fa-times-circle' : 'fa-circle';
+                                    return `<i class="fas ${iconClass}" data-med="${med.name}" data-slot="${slot}"></i>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Add click handlers
+                container.querySelectorAll('.dose-icons i').forEach(icon => {
+                    icon.addEventListener('click', (e) => {
+                        const med = e.target.dataset.med;
+                        const slot = e.target.dataset.slot;
+                        const current = patient.adherence?.[today]?.[med]?.[slot];
+                        const newVal = current === true ? false : (current === false ? null : true);
+                        this.updateDose(patient.id, med, slot, newVal);
+                        this.showPatientDetail(patient.id);
                     });
                 });
             }
-            data.push([s.patientNumber, s.name, s.class, s.stream, s.age, s.symptoms, drugStr, s.drugs[0]?.status || '—', adSum]);
-        });
-        
-        let wb = XLSX.utils.book_new();
-        let ws = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'SickbayReport');
-        return wb;
-    }
 
-    // Save to device functions
-    function showSaveDialog() {
-        const today = new Date().toISOString().slice(0,10);
-        saveFileName.value = `sickbay_report_${today}`;
-        saveDialog.style.display = 'flex';
-        pendingSaveData = generateExcelData();
-    }
-
-    function hideSaveDialog() {
-        saveDialog.style.display = 'none';
-        pendingSaveData = null;
-    }
-
-    function confirmSave() {
-        let filename = saveFileName.value.trim();
-        if (!filename) {
-            filename = `sickbay_report_${new Date().toISOString().slice(0,10)}`;
-        }
-        
-        if (!filename.toLowerCase().endsWith('.xlsx')) {
-            filename += '.xlsx';
-        }
-        
-        if (pendingSaveData) {
-            if (window.pywebview && window.pywebview.api) {
-                // Save to Pulse_Files folder
-                const wbdata = XLSX.write(pendingSaveData, { type: 'base64', bookType: 'xlsx' });
-                window.pywebview.api.save_report_to_folder(wbdata, filename)
-                    .then(result => {
-                        if (result.success) {
-                            alert('Report saved successfully to: ' + result.path);
-                        } else {
-                            alert('Error saving file: ' + result.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error saving:', error);
-                        XLSX.writeFile(pendingSaveData, filename);
-                    });
-            } else {
-                // Browser fallback
-                XLSX.writeFile(pendingSaveData, filename);
+            updateAllCharts() {
+                this.updateConditionsChart();
+                this.updateStatusChart();
+                this.updateMonthlyTrends();
+                this.updateClassDistribution();
+                this.updateMonthlyComparison();
+                this.updateRecoveryRate();
             }
-        }
-        
-        hideSaveDialog();
-    }
 
-    // Email functions
-    function showEmailDialog() {
-        const today = new Date().toISOString().slice(0,10);
-        emailFileName.value = `sickbay_report_${today}`;
-        adminEmail.value = appSettings.adminEmail || 'admin@jicoschool.edu';
-        emailSubject.value = `Sickbay Report - ${today}`;
-        emailDialog.style.display = 'flex';
-        pendingSaveData = generateExcelData();
-    }
-
-    function hideEmailDialog() {
-        emailDialog.style.display = 'none';
-        pendingSaveData = null;
-    }
-
-    function confirmEmail() {
-        let email = adminEmail.value.trim();
-        if (!email) {
-            alert('Please enter an email address');
-            return;
-        }
-        
-        let subject = emailSubject.value.trim() || 'Sickbay Report';
-        let message = emailMessage.value.trim() || 'Please find attached the latest sickbay report.';
-        let filename = emailFileName.value.trim() || `sickbay_report_${new Date().toISOString().slice(0,10)}`;
-        
-        if (!filename.toLowerCase().endsWith('.xlsx')) {
-            filename += '.xlsx';
-        }
-        
-        if (pendingSaveData) {
-            if (window.pywebview && window.pywebview.api) {
-                // Use Python backend to send email
-                const wbdata = XLSX.write(pendingSaveData, { type: 'base64', bookType: 'xlsx' });
-                window.pywebview.api.send_report_email(email, subject, message, wbdata, filename)
-                    .then(result => {
-                        if (result.success) {
-                            alert('Email sent successfully to ' + email);
-                            appSettings.adminEmail = email; // Save for next time
-                        } else {
-                            alert('Error sending email: ' + result.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error sending email:', error);
-                        alert('Failed to send email. Please check your internet connection.');
-                    });
-            } else {
-                // Browser fallback - create mailto link
-                alert('Email functionality requires the desktop application.\nThe file will be saved locally instead.');
-                XLSX.writeFile(pendingSaveData, filename);
-            }
-        }
-        
-        hideEmailDialog();
-    }
-
-    // Event listeners for dialogs
-    document.getElementById('exportExcelBtn').addEventListener('click', () => {
-        if (students.length === 0) {
-            alert('No data to export');
-            return;
-        }
-        showSaveDialog();
-    });
-
-    document.getElementById('emailReportBtn').addEventListener('click', () => {
-        if (students.length === 0) {
-            alert('No data to export');
-            return;
-        }
-        showEmailDialog();
-    });
-
-    cancelSaveBtn.addEventListener('click', hideSaveDialog);
-    confirmSaveBtn.addEventListener('click', confirmSave);
-    cancelEmailBtn.addEventListener('click', hideEmailDialog);
-    confirmEmailBtn.addEventListener('click', confirmEmail);
-
-    // Close dialogs on overlay click
-    saveDialog.addEventListener('click', (e) => {
-        if (e.target === saveDialog) {
-            hideSaveDialog();
-        }
-    });
-    
-    emailDialog.addEventListener('click', (e) => {
-        if (e.target === emailDialog) {
-            hideEmailDialog();
-        }
-    });
-
-    // Handle Enter key in save dialog
-    saveFileName.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            confirmSave();
-        }
-    });
-
-    // Handle Enter key in email dialog
-    adminEmail.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            confirmEmail();
-        }
-    });
-
-    // Import student list
-    document.getElementById('importBtn').addEventListener('click', () => {
-        const file = document.getElementById('importFile').files[0];
-        if (!file) { alert('Select a file'); return; }
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const data = e.target.result;
-            PapaParse.parse(data, { 
-                header: true, 
-                skipEmptyLines: true, 
-                complete: (results) => {
-                    const list = results.data.filter(row => row.Name && row.Name.trim() !== '');
-                    importedStudents = list;
-                    saveImportedToDB(importedStudents);
-                    refreshStudentNameList();
-                    document.getElementById('importStatus').innerText = `Imported ${list.length} students.`;
-                    
-                    // Save to file if in pywebview mode
-                    if (window.pywebview && window.pywebview.api) {
-                        window.pywebview.api.save_imported_to_file(list);
+            updateConditionsChart() {
+                const conditions = {};
+                this.patients.forEach(p => {
+                    if (p.symptoms) {
+                        const mainSym = p.symptoms.split(',')[0].trim();
+                        conditions[mainSym] = (conditions[mainSym] || 0) + 1;
                     }
+                });
+
+                const ctx = document.getElementById('conditionsChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.conditionsChart) window.conditionsChart.destroy();
+                window.conditionsChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(conditions).length ? Object.keys(conditions) : ['No Data'],
+                        datasets: [{
+                            data: Object.keys(conditions).length ? Object.values(conditions) : [1],
+                            backgroundColor: ['#004c97', '#1f5e3a', '#b34a00', '#6a4e9a', '#c02f2f', '#2e8b57']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            updateStatusChart() {
+                const active = this.patients.filter(p => p.status === 'active').length;
+                const completed = this.patients.filter(p => p.status === 'completed').length;
+
+                const ctx = document.getElementById('statusChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.statusChart) window.statusChart.destroy();
+                window.statusChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Active', 'Completed'],
+                        datasets: [{
+                            data: [active, completed],
+                            backgroundColor: ['#b34a00', '#1f5e3a']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateMonthlyTrends() {
+                const monthly = {};
+                this.patients.forEach(p => {
+                    if (p.registrationDate) {
+                        const month = p.registrationDate.slice(0, 7);
+                        monthly[month] = (monthly[month] || 0) + 1;
+                    }
+                });
+
+                const ctx = document.getElementById('monthlyTrendsChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.monthlyTrendsChart) window.monthlyTrendsChart.destroy();
+                window.monthlyTrendsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(monthly).sort(),
+                        datasets: [{
+                            label: 'Patient Visits',
+                            data: Object.values(monthly),
+                            borderColor: '#004c97',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateClassDistribution() {
+                const classes = {};
+                this.patients.forEach(p => {
+                    if (p.class) {
+                        classes[p.class] = (classes[p.class] || 0) + 1;
+                    }
+                });
+
+                const ctx = document.getElementById('classDistributionChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (window.classChart) window.classChart.destroy();
+                window.classChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(classes).length ? Object.keys(classes) : ['No Data'],
+                        datasets: [{
+                            data: Object.keys(classes).length ? Object.values(classes) : [1],
+                            backgroundColor: ['#004c97', '#1f5e3a', '#b34a00', '#6a4e9a', '#c02f2f', '#2e8b57']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateMonthlyComparison() {
+                const ctx = document.getElementById('monthlyComparisonChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const months = [];
+                const counts = [];
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - i);
+                    const month = d.toISOString().slice(0, 7);
+                    months.push(month);
+                    counts.push(this.patients.filter(p => p.registrationDate?.startsWith(month)).length);
                 }
-            });
-        };
-        
-        if (file.name.endsWith('.csv')) {
-            reader.readAsText(file);
-        } else {
-            const fr = new FileReader();
-            fr.onload = (e) => {
-                const wb = XLSX.read(e.target.result, { type: 'binary' });
-                const sheet = wb.SheetNames[0];
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet]);
-                importedStudents = rows.filter(r => r.Name);
-                saveImportedToDB(importedStudents);
-                refreshStudentNameList();
-                document.getElementById('importStatus').innerText = `Imported ${importedStudents.length} students.`;
+
+                if (window.monthlyComparisonChart) window.monthlyComparisonChart.destroy();
+                window.monthlyComparisonChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'New Cases',
+                            data: counts,
+                            borderColor: '#004c97',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateRecoveryRate() {
+                const ctx = document.getElementById('recoveryRateChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const active = this.patients.filter(p => p.status === 'active').length;
+                const recovered = this.patients.filter(p => p.status === 'completed').length;
+
+                if (window.recoveryChart) window.recoveryChart.destroy();
+                window.recoveryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Recovered'],
+                        datasets: [{
+                            data: [active, recovered],
+                            backgroundColor: ['#b34a00', '#1f5e3a']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            updateInventoryDisplay() {
+                const grid = document.getElementById('inventoryGrid');
+                grid.innerHTML = this.inventory.map(item => {
+                    const stockPercent = (item.quantity / (item.reorderLevel * 3)) * 100;
+                    let stockClass = '';
+                    if (item.quantity <= item.reorderLevel) stockClass = 'critical';
+                    else if (item.quantity <= item.reorderLevel * 2) stockClass = 'low';
+
+                    return `
+                        <div class="inventory-card">
+                            <h4 style="margin-bottom: 1rem;">${item.name || 'Unknown'}</h4>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Quantity: <strong>${item.quantity || 0}</strong></span>
+                                    <span>Reorder at: ${item.reorderLevel || 0}</span>
+                                </div>
+                                <div class="stock-level">
+                                    <div class="stock-fill ${stockClass}" style="width: ${Math.min(stockPercent, 100)}%"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-lookup" onclick="system.showStockDialog('${item.name}', ${item.quantity}, ${item.reorderLevel}, ${item.price})" style="flex: 1;">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="btn-email" onclick="system.dispenseStock(${item.id})" style="flex: 1;">
+                                    <i class="fas fa-arrow-right"></i> Dispense
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Update dispensing log
+                const logBody = document.getElementById('dispensingLogBody');
+                const recentLog = this.dispensingLog.slice(-10).reverse();
+                logBody.innerHTML = recentLog.map(d => `
+                    <tr>
+                        <td>${d.date || 'N/A'}</td>
+                        <td>${d.medication || 'N/A'}</td>
+                        <td>${d.quantity || 0}</td>
+                        <td>${d.patient || 'N/A'}</td>
+                        <td>${d.nurse || 'System'}</td>
+                    </tr>
+                `).join('');
+
+                if (recentLog.length === 0) {
+                    logBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No dispensing records</td></tr>';
+                }
+            }
+
+            updateDatabaseView() {
+                const view = document.getElementById('dbTableView').value;
+                const container = document.getElementById('databaseTableContainer');
+
+                let data = [];
+                let headers = [];
+
+                switch(view) {
+                    case 'patients':
+                        data = this.patients;
+                        headers = ['ID', 'Name', 'Class', 'Age', 'Gender', 'Status', 'Registration Date'];
+                        break;
+                    case 'medications':
+                        data = this.patients.flatMap(p => 
+                            (p.medications || []).map(m => ({ ...m, patientId: p.id, patientName: p.name }))
+                        );
+                        headers = ['Patient', 'Medication', 'Dosage', 'Times/Day', 'Duration', 'Status'];
+                        break;
+                    case 'referrals':
+                        data = this.patients.filter(p => p.referral).map(p => ({
+                            patientId: p.id,
+                            patientName: p.name,
+                            ...p.referral
+                        }));
+                        headers = ['Patient', 'Referred To', 'Time', 'Reason', 'Follow-up'];
+                        break;
+                    case 'inventory':
+                        data = this.inventory;
+                        headers = ['Medication', 'Quantity', 'Reorder Level', 'Price', 'Unit'];
+                        break;
+                    case 'dispensing':
+                        data = this.dispensingLog;
+                        headers = ['Date', 'Medication', 'Quantity', 'Patient', 'Nurse'];
+                        break;
+                }
+
+                container.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                ${headers.map(h => `<th>${h}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.length ? data.map(item => {
+                                const row = [];
+                                switch(view) {
+                                    case 'patients':
+                                        row.push(
+                                            item.id || '',
+                                            item.name || '',
+                                            `${item.class || ''} ${item.stream || ''}`,
+                                            item.age || '',
+                                            item.gender || '',
+                                            `<span class="patient-status status-${item.status || ''}">${item.status || ''}</span>`,
+                                            item.registrationDate ? new Date(item.registrationDate).toLocaleDateString() : ''
+                                        );
+                                        break;
+                                    case 'medications':
+                                        row.push(
+                                            `${item.patientName || ''} (${item.patientId || ''})`,
+                                            item.name || '',
+                                            item.dosage || '',
+                                            item.timesPerDay || '',
+                                            item.duration || '',
+                                            item.status || ''
+                                        );
+                                        break;
+                                    case 'referrals':
+                                        row.push(
+                                            `${item.patientName || ''} (${item.patientId || ''})`,
+                                            item.to || '',
+                                            item.time || '',
+                                            item.reason || '',
+                                            item.followup || ''
+                                        );
+                                        break;
+                                    case 'inventory':
+                                        row.push(
+                                            item.name || '',
+                                            item.quantity || 0,
+                                            item.reorderLevel || 0,
+                                            item.price ? `$${item.price}` : '$0',
+                                            item.unit || ''
+                                        );
+                                        break;
+                                    case 'dispensing':
+                                        row.push(
+                                            item.date || '',
+                                            item.medication || '',
+                                            item.quantity || 0,
+                                            item.patient || '',
+                                            item.nurse || ''
+                                        );
+                                        break;
+                                }
+                                return `<tr>${row.map(r => `<td>${r}</td>`).join('')}</tr>`;
+                            }).join('') : '<tr><td colspan="100" style="text-align: center;">No data available</td></tr>'}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            showStockDialog(name = '', quantity = 0, reorder = 0, price = 0) {
+                document.getElementById('stockName').value = name;
+                document.getElementById('stockQuantity').value = quantity;
+                document.getElementById('stockReorder').value = reorder;
+                document.getElementById('stockPrice').value = price;
+                document.getElementById('stockDialog').style.display = 'flex';
+            }
+
+            async importExcelFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                            
+                            // Get headers from first row
+                            const headers = jsonData[0] || [];
+                            const rows = jsonData.slice(1);
+                            
+                            // Map to objects
+                            const students = rows.map(row => {
+                                const student = {};
+                                headers.forEach((header, index) => {
+                                    if (header) {
+                                        const key = header.trim().toLowerCase();
+                                        const value = row[index];
+                                        
+                                        // Map common header names
+                                        if (key.includes('name')) student.name = value;
+                                        else if (key.includes('class')) student.class = value;
+                                        else if (key.includes('stream')) student.stream = value;
+                                        else if (key.includes('age')) student.age = parseInt(value) || null;
+                                        else if (key.includes('gender')) student.gender = value;
+                                        else if (key.includes('contact')) student.contact = value;
+                                    }
+                                });
+                                
+                                // Only include if we have at least a name
+                                if (student.name) {
+                                    return {
+                                        ...student,
+                                        id: Date.now() + Math.random(),
+                                        importDate: new Date().toISOString()
+                                    };
+                                }
+                                return null;
+                            }).filter(s => s !== null);
+                            
+                            resolve(students);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(reader.error);
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            async importCsvFile(file) {
+                return new Promise((resolve, reject) => {
+                    PapaParse.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            try {
+                                const students = results.data
+                                    .filter(row => {
+                                        // Check if row has at least a name field
+                                        const nameField = Object.values(row).find(v => v && v.toString().trim());
+                                        return nameField;
+                                    })
+                                    .map((row, index) => {
+                                        const student = {
+                                            id: Date.now() + index,
+                                            importDate: new Date().toISOString()
+                                        };
+                                        
+                                        // Map all fields, normalizing headers
+                                        Object.keys(row).forEach(key => {
+                                            const normalizedKey = key.trim().toLowerCase();
+                                            const value = row[key];
+                                            
+                                            if (normalizedKey.includes('name')) student.name = value;
+                                            else if (normalizedKey.includes('class')) student.class = value;
+                                            else if (normalizedKey.includes('stream')) student.stream = value;
+                                            else if (normalizedKey.includes('age')) student.age = parseInt(value) || null;
+                                            else if (normalizedKey.includes('gender')) student.gender = value;
+                                            else if (normalizedKey.includes('contact')) student.contact = value;
+                                        });
+                                        
+                                        return student;
+                                    });
+                                
+                                resolve(students);
+                            } catch (error) {
+                                reject(error);
+                            }
+                        },
+                        error: (error) => reject(error)
+                    });
+                });
+            }
+
+            async handleFileImport(file) {
+                const progressDiv = document.getElementById('importProgress');
+                const progressBar = document.getElementById('importProgressBar');
+                const statusEl = document.getElementById('importStatus');
                 
-                // Save to file if in pywebview mode
-                if (window.pywebview && window.pywebview.api) {
-                    window.pywebview.api.save_imported_to_file(importedStudents);
+                progressDiv.style.display = 'block';
+                statusEl.textContent = 'Reading file...';
+                progressBar.style.width = '30%';
+                
+                try {
+                    let students = [];
+                    
+                    if (file.name.endsWith('.csv')) {
+                        statusEl.textContent = 'Processing CSV...';
+                        progressBar.style.width = '50%';
+                        students = await this.importCsvFile(file);
+                    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        statusEl.textContent = 'Processing Excel...';
+                        progressBar.style.width = '50%';
+                        students = await this.importExcelFile(file);
+                    } else {
+                        throw new Error('Unsupported file type. Please upload CSV or Excel file.');
+                    }
+                    
+                    progressBar.style.width = '80%';
+                    statusEl.textContent = `Validating ${students.length} records...`;
+                    
+                    // Validate and clean data
+                    const validStudents = students.filter(s => {
+                        return s.name && s.name.toString().trim();
+                    });
+                    
+                    if (validStudents.length === 0) {
+                        throw new Error('No valid student records found. Please check file format.');
+                    }
+                    
+                    progressBar.style.width = '90%';
+                    statusEl.textContent = `Saving ${validStudents.length} students...`;
+                    
+                    // Add to database
+                    this.studentDatabase = [...this.studentDatabase, ...validStudents];
+                    this.saveStudentDatabase();
+                    
+                    // Update datalist for lookup
+                    const datalist = document.getElementById('studentList');
+                    datalist.innerHTML = '';
+                    this.studentDatabase.forEach(s => {
+                        if (s.name) {
+                            const option = document.createElement('option');
+                            option.value = s.name;
+                            datalist.appendChild(option);
+                        }
+                    });
+                    
+                    progressBar.style.width = '100%';
+                    statusEl.textContent = `✓ Successfully imported ${validStudents.length} students!`;
+                    
+                    setTimeout(() => {
+                        document.getElementById('importDialog').style.display = 'none';
+                        progressDiv.style.display = 'none';
+                    }, 1500);
+                    
+                    return validStudents;
+                    
+                } catch (error) {
+                    console.error('Import error:', error);
+                    statusEl.textContent = `✗ Error: ${error.message}`;
+                    progressBar.style.width = '0%';
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 3000);
+                    throw error;
                 }
-            };
-            fr.readAsBinaryString(file);
+            }
+
+            setupEventListeners() {
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-theme');
+                    const icon = document.querySelector('#themeToggle i');
+                    if (document.body.classList.contains('dark-theme')) {
+                        icon.className = 'fas fa-moon';
+                    } else {
+                        icon.className = 'fas fa-sun';
+                    }
+                });
+
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        
+                        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                        
+                        // Refresh views when switching tabs
+                        if (tab.dataset.tab === 'database') {
+                            this.updateDatabaseView();
+                        } else if (tab.dataset.tab === 'statistics') {
+                            this.updateAllCharts();
+                        } else if (tab.dataset.tab === 'inventory') {
+                            this.updateInventoryDisplay();
+                        }
+                    });
+                });
+
+                // Patient search
+                const patientSearch = document.getElementById('patientSearch');
+                if (patientSearch) {
+                    patientSearch.addEventListener('input', () => {
+                        this.renderPatientList();
+                    });
+                }
+
+                // Register patient
+                document.getElementById('registerPatientBtn').addEventListener('click', () => {
+                    const medications = [];
+                    document.querySelectorAll('.drug-entry').forEach(div => {
+                        const nameInput = div.querySelector('.drug-name');
+                        if (nameInput && nameInput.value) {
+                            medications.push({
+                                name: nameInput.value,
+                                dosage: div.querySelector('.drug-dosage')?.value || '',
+                                duration: parseInt(div.querySelector('.drug-duration')?.value) || 3,
+                                timesPerDay: parseInt(div.querySelector('.drug-times')?.value) || 2,
+                                status: 'active'
+                            });
+                        }
+                    });
+
+                    const referral = document.getElementById('hasReferral').checked ? {
+                        to: document.getElementById('referralTo').value,
+                        time: document.getElementById('referralTime').value,
+                        reason: document.getElementById('referralReason').value,
+                        followup: document.getElementById('followupDate').value
+                    } : null;
+
+                    const patientData = {
+                        name: document.getElementById('patientName').value,
+                        class: document.getElementById('patientClass').value,
+                        stream: document.getElementById('patientStream').value,
+                        age: parseInt(document.getElementById('patientAge').value) || null,
+                        gender: document.getElementById('patientGender').value,
+                        contact: document.getElementById('patientContact').value,
+                        symptoms: document.getElementById('patientSymptoms').value,
+                        notes: document.getElementById('patientNotes').value,
+                        medications: medications,
+                        referral: referral
+                    };
+
+                    if (!patientData.name) {
+                        alert('Please enter patient name');
+                        return;
+                    }
+
+                    const patient = this.registerPatient(patientData);
+                    alert(`Patient registered successfully! ID: ${patient.id}`);
+                    
+                    // Reset form
+                    document.getElementById('patientName').value = '';
+                    document.getElementById('patientAge').value = '';
+                    document.getElementById('patientContact').value = '';
+                    document.getElementById('patientSymptoms').value = '';
+                    document.getElementById('patientNotes').value = '';
+                    document.getElementById('hasReferral').checked = false;
+                    document.getElementById('referralDetails').classList.remove('active');
+                    
+                    // Reset medications
+                    document.getElementById('medicationsList').innerHTML = '';
+                    this.addMedicationRow();
+                });
+
+                // Referral toggle
+                document.getElementById('hasReferral').addEventListener('change', (e) => {
+                    document.getElementById('referralDetails').classList.toggle('active', e.target.checked);
+                });
+
+                // Add medication
+                document.getElementById('addMedicationBtn').addEventListener('click', () => {
+                    this.addMedicationRow();
+                });
+
+                // Student lookup
+                document.getElementById('lookupStudentBtn').addEventListener('click', () => {
+                    const search = document.getElementById('studentSearch').value.toLowerCase();
+                    const student = this.studentDatabase.find(s => 
+                        s.name?.toLowerCase().includes(search)
+                    );
+                    
+                    if (student) {
+                        document.getElementById('patientName').value = student.name || '';
+                        document.getElementById('patientClass').value = student.class || 'S.1';
+                        document.getElementById('patientStream').value = student.stream || 'East';
+                        document.getElementById('patientAge').value = student.age || '';
+                        document.getElementById('patientGender').value = student.gender || 'Male';
+                        document.getElementById('patientContact').value = student.contact || '';
+                    } else {
+                        alert('Student not found in database');
+                    }
+                });
+
+                // Stock dialog
+                document.getElementById('addStockBtn').addEventListener('click', () => {
+                    this.showStockDialog();
+                });
+
+                document.getElementById('cancelStockBtn').addEventListener('click', () => {
+                    document.getElementById('stockDialog').style.display = 'none';
+                });
+
+                document.getElementById('saveStockBtn').addEventListener('click', () => {
+                    const name = document.getElementById('stockName').value;
+                    const quantity = parseInt(document.getElementById('stockQuantity').value) || 0;
+                    const reorder = parseInt(document.getElementById('stockReorder').value) || 0;
+                    const price = parseFloat(document.getElementById('stockPrice').value) || 0;
+
+                    if (!name) {
+                        alert('Please enter medication name');
+                        return;
+                    }
+
+                    const existing = this.inventory.find(i => i.name?.toLowerCase() === name.toLowerCase());
+                    if (existing) {
+                        existing.quantity = quantity;
+                        existing.reorderLevel = reorder;
+                        existing.price = price;
+                    } else {
+                        this.inventory.push({
+                            id: this.inventory.length + 1,
+                            name: name,
+                            quantity: quantity,
+                            reorderLevel: reorder,
+                            price: price,
+                            unit: 'units'
+                        });
+                    }
+
+                    this.saveInventory();
+                    this.updateInventoryDisplay();
+                    document.getElementById('stockDialog').style.display = 'none';
+                });
+
+                // Database view selector
+                document.getElementById('dbTableView').addEventListener('change', () => {
+                    this.updateDatabaseView();
+                });
+
+                // Export buttons
+                document.getElementById('exportPatientsBtn').addEventListener('click', () => {
+                    this.exportData('patients');
+                });
+
+                document.getElementById('exportInventoryBtn').addEventListener('click', () => {
+                    this.exportData('inventory');
+                });
+
+                document.getElementById('generateFullReport').addEventListener('click', () => {
+                    this.exportFullReport();
+                });
+
+                document.getElementById('backupDatabaseBtn').addEventListener('click', () => {
+                    this.backupDatabase();
+                });
+
+                // Import students button
+                document.getElementById('importStudentsBtn').addEventListener('click', () => {
+                    document.getElementById('importFile').value = ''; // Clear previous selection
+                    document.getElementById('importProgress').style.display = 'none';
+                    document.getElementById('importDialog').style.display = 'flex';
+                });
+
+                document.getElementById('cancelImportBtn').addEventListener('click', () => {
+                    document.getElementById('importDialog').style.display = 'none';
+                });
+
+                document.getElementById('confirmImportBtn').addEventListener('click', async () => {
+                    const fileInput = document.getElementById('importFile');
+                    const file = fileInput.files[0];
+                    
+                    if (!file) {
+                        alert('Please select a file to import');
+                        return;
+                    }
+
+                    try {
+                        await this.handleFileImport(file);
+                    } catch (error) {
+                        alert(`Import failed: ${error.message}`);
+                    }
+                });
+
+                // Restore database
+                document.getElementById('restoreDatabaseBtn').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = (e) => {
+                            try {
+                                const backup = JSON.parse(e.target.result);
+                                
+                                if (backup.patients) this.patients = backup.patients;
+                                if (backup.inventory) this.inventory = backup.inventory;
+                                if (backup.dispensingLog) this.dispensingLog = backup.dispensingLog;
+                                if (backup.studentDatabase) this.studentDatabase = backup.studentDatabase;
+                                
+                                this.savePatients();
+                                this.saveInventory();
+                                this.saveDispensing();
+                                this.saveStudentDatabase();
+                                
+                                this.refreshUI();
+                                this.updateInventoryDisplay();
+                                this.updateDatabaseView();
+                                
+                                alert('Database restored successfully!');
+                            } catch (error) {
+                                alert('Error restoring database: ' + error.message);
+                            }
+                        };
+                        
+                        reader.readAsText(file);
+                    };
+                    
+                    input.click();
+                });
+
+                // Optimize database
+                document.getElementById('optimizeDatabaseBtn').addEventListener('click', () => {
+                    // Remove duplicate entries and clean data
+                    const uniquePatients = [];
+                    const seenIds = new Set();
+                    
+                    this.patients.forEach(p => {
+                        if (p.id && !seenIds.has(p.id)) {
+                            seenIds.add(p.id);
+                            uniquePatients.push(p);
+                        }
+                    });
+                    
+                    if (uniquePatients.length !== this.patients.length) {
+                        this.patients = uniquePatients;
+                        this.savePatients();
+                        alert(`Optimized database: removed ${this.patients.length - uniquePatients.length} duplicate entries`);
+                    } else {
+                        alert('Database is already optimized');
+                    }
+                    
+                    this.refreshUI();
+                });
+
+                // Mark completed button
+                document.getElementById('markCompletedBtn').addEventListener('click', () => {
+                    const patientId = document.getElementById('detailPatientId').textContent;
+                    if (patientId && patientId !== 'N/A') {
+                        this.markPatientCompleted(patientId);
+                    }
+                });
+
+                // Email report
+                document.getElementById('emailReportBtn').addEventListener('click', () => {
+                    const subject = encodeURIComponent('Pulse Healthcare Report');
+                    const body = encodeURIComponent(
+                        `Healthcare Report\n\n` +
+                        `Total Patients: ${this.patients.length}\n` +
+                        `Active: ${this.patients.filter(p => p.status === 'active').length}\n` +
+                        `Recovered: ${this.patients.filter(p => p.status === 'completed').length}\n` +
+                        `Generated: ${new Date().toLocaleString()}`
+                    );
+                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                });
+
+                // Generate monthly report
+                document.getElementById('generateMonthlyReport').addEventListener('click', () => {
+                    const thisMonth = new Date().toISOString().slice(0, 7);
+                    const monthlyPatients = this.patients.filter(p => 
+                        p.registrationDate?.startsWith(thisMonth)
+                    );
+                    
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(monthlyPatients);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Monthly Report');
+                    XLSX.writeFile(wb, `monthly_report_${thisMonth}.xlsx`);
+                });
+
+                // Initialize with one medication row
+                this.addMedicationRow();
+            }
+
+            addMedicationRow() {
+                const container = document.getElementById('medicationsList');
+                const div = document.createElement('div');
+                div.className = 'drug-entry';
+                div.innerHTML = `
+                    <input type="text" class="form-control drug-name" placeholder="Medication" list="medicationList">
+                    <input type="text" class="form-control drug-dosage" placeholder="Dosage">
+                    <input type="number" class="form-control drug-duration" placeholder="Days" value="3" min="1" style="width: 80px;">
+                    <select class="form-control drug-times" style="width: 70px;">
+                        <option value="1">1x</option>
+                        <option value="2" selected>2x</option>
+                        <option value="3">3x</option>
+                    </select>
+                    <button class="btn-remove-drug"><i class="fas fa-times"></i></button>
+                `;
+
+                div.querySelector('.btn-remove-drug').addEventListener('click', () => {
+                    if (document.querySelectorAll('.drug-entry').length > 1) {
+                        div.remove();
+                    }
+                });
+
+                container.appendChild(div);
+            }
+
+            exportData(type) {
+                let data = [];
+                let filename = '';
+
+                switch(type) {
+                    case 'patients':
+                        data = this.patients.map(p => ({
+                            ID: p.id,
+                            Name: p.name,
+                            Class: p.class,
+                            Stream: p.stream,
+                            Age: p.age,
+                            Gender: p.gender,
+                            Contact: p.contact,
+                            Symptoms: p.symptoms,
+                            Status: p.status,
+                            'Registration Date': p.registrationDate
+                        }));
+                        filename = `patients_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                        break;
+                    case 'inventory':
+                        data = this.inventory;
+                        filename = `inventory_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                        break;
+                }
+
+                if (data.length) {
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                    XLSX.writeFile(wb, filename);
+                } else {
+                    alert('No data to export');
+                }
+            }
+
+            exportFullReport() {
+                const wb = XLSX.utils.book_new();
+
+                // Patients sheet
+                const patientsData = this.patients.map(p => ({
+                    ID: p.id,
+                    Name: p.name,
+                    Class: p.class,
+                    Stream: p.stream,
+                    Age: p.age,
+                    Gender: p.gender,
+                    Symptoms: p.symptoms,
+                    Status: p.status,
+                    'Registration Date': p.registrationDate
+                }));
+                const patientsWs = XLSX.utils.json_to_sheet(patientsData);
+                XLSX.utils.book_append_sheet(wb, patientsWs, 'Patients');
+
+                // Inventory sheet
+                const inventoryWs = XLSX.utils.json_to_sheet(this.inventory);
+                XLSX.utils.book_append_sheet(wb, inventoryWs, 'Inventory');
+
+                // Dispensing sheet
+                const dispensingWs = XLSX.utils.json_to_sheet(this.dispensingLog);
+                XLSX.utils.book_append_sheet(wb, dispensingWs, 'Dispensing Log');
+
+                XLSX.writeFile(wb, `pulse_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            }
+
+            backupDatabase() {
+                const backup = {
+                    patients: this.patients,
+                    inventory: this.inventory,
+                    dispensingLog: this.dispensingLog,
+                    studentDatabase: this.studentDatabase,
+                    timestamp: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(backup, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pulse_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                document.getElementById('dbLastBackup').textContent = new Date().toLocaleString();
+            }
+
+            dispenseStock(itemId) {
+                const item = this.inventory.find(i => i.id === itemId);
+                if (item && item.quantity > 0) {
+                    item.quantity--;
+                    this.dispensingLog.push({
+                        id: Date.now(),
+                        date: new Date().toISOString().slice(0, 10),
+                        medication: item.name,
+                        quantity: 1,
+                        patient: 'Manual Dispense',
+                        nurse: 'System'
+                    });
+                    this.saveInventory();
+                    this.saveDispensing();
+                    this.updateInventoryDisplay();
+                } else if (item && item.quantity <= 0) {
+                    alert('Out of stock!');
+                }
+            }
         }
-    });
 
-    // Tab switching
-    document.getElementById('tabMain').addEventListener('click', ()=>{
-        document.getElementById('tabMain').classList.add('active'); 
-        document.getElementById('tabStats').classList.remove('active');
-        document.getElementById('paneMain').classList.add('active'); 
-        document.getElementById('paneStats').classList.remove('active');
-    });
-    
-    document.getElementById('tabStats').addEventListener('click', ()=>{
-        document.getElementById('tabStats').classList.add('active'); 
-        document.getElementById('tabMain').classList.remove('active');
-        document.getElementById('paneStats').classList.add('active'); 
-        document.getElementById('paneMain').classList.remove('active');
-        setTimeout(updateChartsAndMissed, 30);
-    });
+        // Initialize the system
+        const system = new HealthcareSystem();
+        window.system = system;
+    </script>
+    <footer class="site-footer">
+  <div class="footer-content">
+    <p class="footer-title">Pulse <span>by JicoICTClub 2026.</span></p>
+    <p class="footer-credits">
+      Made by
+      <span>Wodelo Joshua</span>,
+      <span>Mukisa Minjo</span>,
+      <span>Myokos Kweko</span> &
+      <span>Ogwang Daniel</span>
+    </p>
+  </div>
+</footer>
 
-    // Initialize the application
-    openDB().catch(e => {
-        console.warn('DB failed, using fallback (in-memory)');
-        refreshUI('');
-    });
-
-})();
-</script>
-
-<!-- Python backend bridge for pywebview -->
-<script>
-// This will be available when running in pywebview
-if (window.pywebview && window.pywebview.api) {
-    console.log('pywebview API detected - using native file system');
-} else {
-    console.log('Running in browser mode - using browser storage');
-    
-    // Add browser mode indicator
-    document.addEventListener('DOMContentLoaded', function() {
-        const folderDisplay = document.getElementById('folderPathDisplay');
-        if (folderDisplay) {
-            folderDisplay.innerHTML = '<i class="fas fa-info-circle"></i> Browser mode: Data stored in browser storage only';
-        }
-    });
-}
-</script>
 </body>
 </html>
